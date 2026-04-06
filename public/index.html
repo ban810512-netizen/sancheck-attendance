@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>근무상황부 · 산청인애노인통합지원센터</title>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#f0f4f8;color:#1e293b;min-height:100vh;}
+
+/* ══════════════════════════════
+   PC 레이아웃 (768px 이상)
+   좌측 사이드바 + 우측 콘텐츠
+══════════════════════════════ */
+.app-shell{display:flex;min-height:100vh;}
+
+/* ── PC 사이드바 ── */
+.sidebar{width:220px;min-height:100vh;background:#1e293b;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;bottom:0;z-index:300;}
+.sidebar-logo{padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-logo .s-title{font-size:15px;font-weight:800;color:#fff;line-height:1.3;}
+.sidebar-logo .s-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:3px;}
+.sidebar-clock{font-size:22px;font-weight:800;color:#fff;letter-spacing:1px;padding:12px 20px;font-variant-numeric:tabular-nums;border-bottom:1px solid rgba(255,255,255,.08);}
+.sidebar-date{font-size:11px;color:rgba(255,255,255,.45);padding:6px 20px 14px;}
+.sidebar-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.s-nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:rgba(255,255,255,.6);font-size:14px;font-weight:600;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+.s-nav-item i{width:18px;text-align:center;font-size:15px;}
+.s-nav-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.s-nav-item.active{background:#2563eb;color:#fff;border-radius:0;}
+
+/* ── PC 메인 콘텐츠 영역 ── */
+.main-area{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.main-topbar{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.main-topbar .page-title{font-size:18px;font-weight:800;color:#1e293b;}
+.content-wrap{padding:24px 28px;flex:1;}
+
+/* ── 모바일: 사이드바 숨김, 바텀탭 표시 ── */
+@media(max-width:767px){
+  .sidebar{display:none;}
+  .main-area{margin-left:0;}
+  .main-topbar{padding:12px 16px;}
+  .main-topbar .page-title{font-size:16px;}
+  .content-wrap{padding:12px 12px 76px;}
+  .bot-nav{display:flex!important;}
+}
+@media(min-width:768px){
+  .bot-nav{display:none!important;}
+  .content-wrap{padding:24px 28px 24px;}
+}
+
+/* ── 바텀 탭 (모바일 전용) ── */
+.bot-nav{position:fixed;bottom:0;left:0;right:0;height:62px;background:#fff;border-top:1px solid #e2e8f0;display:none;z-index:200;box-shadow:0 -2px 12px rgba(0,0,0,.08);}
+.bot-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;cursor:pointer;color:#94a3b8;font-size:10px;font-weight:600;transition:color .15s;padding:6px 0;}
+.bot-tab i{font-size:19px;}
+.bot-tab.active{color:#2563eb;}
+
+/* ── 페이지 전환 ── */
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── 카드 ── */
+.card{background:#fff;border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 8px rgba(0,0,0,.04);}
+.card-title{font-size:13px;font-weight:700;color:#64748b;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.card-title i{color:#2563eb;}
+
+/* ── 직원 아코디언 ── */
+.emp-item{background:#fff;border-radius:14px;border:2px solid #e2e8f0;overflow:hidden;margin-bottom:10px;transition:border-color .15s,box-shadow .15s;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.emp-item:hover{box-shadow:0 2px 8px rgba(37,99,235,.12);}
+.emp-item.open{border-color:#2563eb;box-shadow:0 2px 12px rgba(37,99,235,.15);}
+.emp-head{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;}
+.emp-head:hover{background:#f8faff;}
+.emp-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;flex-shrink:0;}
+.emp-info{flex:1;min-width:0;}
+.emp-nm{font-size:17px;font-weight:800;color:#0f172a;}
+.emp-ps{font-size:12px;color:#94a3b8;margin-top:2px;}
+.emp-right{text-align:right;flex-shrink:0;}
+.emp-time-txt{font-size:11px;color:#94a3b8;margin-top:4px;}
+.emp-chevron{font-size:13px;color:#94a3b8;margin-left:6px;transition:transform .2s;}
+.emp-item.open .emp-chevron{transform:rotate(180deg);}
+
+/* ── 상태 버튼 패널 ── */
+.stt-panel{display:none;border-top:1px solid #e2e8f0;padding:16px 18px;background:#f8fafc;}
+.emp-item.open .stt-panel{display:block;}
+.stt-date-row{display:flex;gap:10px;margin-bottom:14px;}
+.stt-date-row>div{flex:1;}
+.stt-date-label{font-size:11px;font-weight:700;color:#64748b;margin-bottom:5px;}
+.stt-date-row input{width:100%;border:1.5px solid #e2e8f0;border-radius:9px;padding:9px 12px;font-size:14px;outline:none;background:#fff;font-family:inherit;}
+.stt-date-row input:focus{border-color:#2563eb;}
+.stt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(min-width:768px){.stt-grid{grid-template-columns:repeat(8,1fr);gap:10px;}}
+.stt-btn{border:none;border-radius:12px;padding:14px 4px 12px;font-size:12px;font-weight:800;cursor:pointer;text-align:center;transition:transform .1s,opacity .15s;line-height:1.2;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.stt-btn:hover{filter:brightness(1.05);}
+.stt-btn:active{transform:scale(.91);opacity:.8;}
+.stt-btn i{display:block;font-size:20px;margin-bottom:6px;}
+.stt-출근{background:#dcfce7;color:#16a34a;}
+.stt-퇴근{background:#dbeafe;color:#1d4ed8;}
+.stt-오전반차{background:#ede9fe;color:#6d28d9;}
+.stt-오후반차{background:#ede9fe;color:#6d28d9;}
+.stt-연차{background:#fef9c3;color:#92400e;}
+.stt-병가{background:#fee2e2;color:#b91c1c;}
+.stt-경조휴가{background:#ffedd5;color:#c2410c;}
+.stt-공가{background:#e0f2fe;color:#0369a1;}
+
+/* ── 배지 ── */
+.bdg{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+.bdg-출근{background:#dcfce7;color:#16a34a;}
+.bdg-퇴근{background:#dbeafe;color:#1d4ed8;}
+.bdg-연차{background:#fef9c3;color:#92400e;}
+.bdg-오전반차,.bdg-오후반차{background:#ede9fe;color:#6d28d9;}
+.bdg-병가{background:#fee2e2;color:#b91c1c;}
+.bdg-경조휴가{background:#ffedd5;color:#c2410c;}
+.bdg-공가{background:#e0f2fe;color:#0369a1;}
+.bdg-미등록{background:#f1f5f9;color:#94a3b8;}
+.bdg-휴무{background:#f1f5f9;color:#94a3b8;}
+
+/* ── 공통 입력 ── */
+input[type=text],input[type=date],select,textarea{width:100%;border:1.5px solid #e2e8f0;border-radius:9px;padding:10px 12px;font-size:14px;outline:none;background:#fff;font-family:inherit;color:#1e293b;}
+input:focus,select:focus,textarea:focus{border-color:#2563eb;}
+label{font-size:12px;font-weight:600;color:#64748b;display:block;margin-bottom:5px;}
+
+/* ── 버튼 ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;width:100%;transition:filter .1s;}
+.btn:hover{filter:brightness(1.05);}
+.btn-blue{background:#2563eb;color:#fff;}
+.btn-gray{background:#f1f5f9;color:#374151;border:1px solid #e2e8f0;}
+.btn-red{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+.btn-green{background:#16a34a;color:#fff;}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:8px;width:auto;}
+
+/* ── 폼 행 ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.form-row.full{grid-template-columns:1fr;}
+
+/* ── 월별 테이블 ── */
+.mo-tbl{border-collapse:collapse;width:100%;font-size:11px;}
+.mo-tbl th{background:#334155;color:#fff;padding:6px 4px;text-align:center;border:1px solid #475569;}
+.mo-tbl td{border:1px solid #e2e8f0;padding:5px 3px;text-align:center;}
+.mo-tbl .wknd td{background:#fafafa;color:#94a3b8;}
+.mo-tbl .sum td{background:#eff6ff;font-weight:700;color:#1d4ed8;}
+
+/* ── 통계 테이블 ── */
+.st-tbl{width:100%;border-collapse:collapse;font-size:14px;}
+.st-tbl th{background:#f8fafc;color:#64748b;font-weight:600;font-size:12px;padding:10px 12px;border-bottom:2px solid #e2e8f0;text-align:center;}
+.st-tbl td{padding:12px;border-bottom:1px solid #f1f5f9;text-align:center;color:#374151;}
+.st-tbl tr:hover td{background:#f8faff;}
+.st-tbl .nm{text-align:left;font-weight:700;color:#0f172a;}
+
+/* ── 연차신청서 ── */
+.lv-tbl{width:100%;border-collapse:collapse;}
+.lv-tbl th,.lv-tbl td{border:1px solid #374151;padding:10px 12px;font-size:13px;}
+.lv-tbl th{background:#f5f5f5;font-weight:700;color:#111;width:100px;}
+.ap-wrap{display:flex;justify-content:flex-end;margin-bottom:16px;}
+.ap-table{border-collapse:collapse;border:1.5px solid #111;}
+.ap-table th{background:#f0f0f0;text-align:center;padding:5px 18px;font-size:11px;font-weight:700;color:#111;border:1px solid #555;white-space:nowrap;}
+.ap-table td{width:68px;height:58px;border:1px solid #555;vertical-align:top;padding:3px;font-size:11px;}
+
+/* ── 토스트 ── */
+#toast{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;}
+.tst{background:#0f172a;color:#fff;padding:11px 22px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:8px;animation:fadeIn .2s ease;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PIN 잠금 화면 ── */
+#pin-screen{position:fixed;inset:0;background:#1e293b;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9000;}
+#pin-screen.hide{display:none;}
+.pin-logo{text-align:center;margin-bottom:36px;}
+.pin-logo .pl-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
+.pin-logo .pl-sub{font-size:13px;color:rgba(255,255,255,.45);}
+.pin-dots{display:flex;gap:16px;margin-bottom:40px;}
+.pin-dot{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .15s;}
+.pin-dot.filled{background:#2563eb;}
+.pin-dot.error{background:#ef4444;}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:260px;}
+.pin-btn{height:72px;border-radius:16px;border:none;background:rgba(255,255,255,.08);color:#fff;font-size:24px;font-weight:700;cursor:pointer;transition:background .1s,transform .1s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
+.pin-btn:active{background:rgba(255,255,255,.18);transform:scale(.94);}
+.pin-btn .pk-sub{font-size:9px;color:rgba(255,255,255,.35);font-weight:500;letter-spacing:1px;}
+.pin-del{background:transparent!important;font-size:20px;}
+.pin-err{font-size:13px;color:#ef4444;margin-top:-24px;margin-bottom:16px;min-height:20px;text-align:center;}
+
+/* ── 인쇄 ── */
+@media print{
+  .sidebar,.bot-nav,.main-topbar,.no-print{display:none!important;}
+  .main-area{margin-left:0!important;}
+  body{background:#fff!important;}
+  .card{box-shadow:none!important;border-radius:0!important;padding:6px!important;}
+  @page{size:A4 portrait;margin:8mm;}
+}
+body.print-monthly .main-area>*:not(#pg-monthly){display:none!important;}
+body.print-monthly #pg-monthly{display:block!important;padding:0!important;}
+body.print-monthly .mo-tbl{font-size:7px!important;table-layout:fixed;width:100%!important;}
+body.print-monthly .mo-tbl th,body.print-monthly .mo-tbl td{font-size:7px!important;padding:2px 1px!important;}
+body.print-personal #pg-print{display:block!important;padding:0!important;}
+body.print-personal .main-area>*:not(#pg-print){display:none!important;}
+body.print-leave #pg-leave{display:block!important;padding:0!important;}
+body.print-leave .main-area>*:not(#pg-leave){display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- ══ PIN 잠금 화면 ══ -->
+<div id="pin-screen">
+  <div class="pin-logo">
+    <div style="font-size:40px;margin-bottom:12px;">🔒</div>
+    <div class="pl-title">산청인애노인통합지원센터</div>
+    <div class="pl-sub">근무상황부 · PIN 4자리를 입력하세요</div>
+  </div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd-0"></div>
+    <div class="pin-dot" id="pd-1"></div>
+    <div class="pin-dot" id="pd-2"></div>
+    <div class="pin-dot" id="pd-3"></div>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinInput('1')">1<span class="pk-sub"></span></button>
+    <button class="pin-btn" onclick="pinInput('2')">2<span class="pk-sub">ABC</span></button>
+    <button class="pin-btn" onclick="pinInput('3')">3<span class="pk-sub">DEF</span></button>
+    <button class="pin-btn" onclick="pinInput('4')">4<span class="pk-sub">GHI</span></button>
+    <button class="pin-btn" onclick="pinInput('5')">5<span class="pk-sub">JKL</span></button>
+    <button class="pin-btn" onclick="pinInput('6')">6<span class="pk-sub">MNO</span></button>
+    <button class="pin-btn" onclick="pinInput('7')">7<span class="pk-sub">PQRS</span></button>
+    <button class="pin-btn" onclick="pinInput('8')">8<span class="pk-sub">TUV</span></button>
+    <button class="pin-btn" onclick="pinInput('9')">9<span class="pk-sub">WXYZ</span></button>
+    <div></div>
+    <button class="pin-btn" onclick="pinInput('0')">0</button>
+    <button class="pin-btn pin-del" onclick="pinDel()"><i class="fas fa-delete-left"></i></button>
+  </div>
+</div>
+
+<div class="app-shell">
+
+<!-- ══ PC 사이드바 ══ -->
+<aside class="sidebar no-print">
+  <div class="sidebar-logo">
+    <div class="s-title">근무상황부</div>
+    <div class="s-sub">산청인애노인통합지원센터</div>
+  </div>
+  <div class="sidebar-clock" id="hClock">--:--:--</div>
+  <div class="sidebar-date" id="side-date"></div>
+  <nav class="sidebar-nav">
+    <button class="s-nav-item active" onclick="goTab('dash',this)" id="tab-dash"><i class="fas fa-home"></i>대시보드</button>
+    <button class="s-nav-item" onclick="goTab('monthly',this)" id="tab-monthly"><i class="fas fa-calendar-alt"></i>근무현황</button>
+    <button class="s-nav-item" onclick="goTab('leave',this)" id="tab-leave"><i class="fas fa-file-alt"></i>연차신청</button>
+    <button class="s-nav-item" onclick="goTab('print',this)" id="tab-print"><i class="fas fa-print"></i>개인출력</button>
+    <button class="s-nav-item" onclick="goTab('stats',this)" id="tab-stats"><i class="fas fa-chart-bar"></i>연차현황</button>
+    <button class="s-nav-item" onclick="goTab('emp',this)" id="tab-emp"><i class="fas fa-users"></i>직원관리</button>
+  </nav>
+</aside>
+
+<!-- ══ 메인 영역 ══ -->
+<div class="main-area">
+
+  <!-- 상단 타이틀바 (PC/모바일 공용) -->
+  <div class="main-topbar no-print">
+    <div class="page-title" id="main-title">대시보드</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:13px;color:#64748b;" id="top-date"></span>
+      <span style="font-size:17px;font-weight:700;color:#1e293b;font-variant-numeric:tabular-nums;display:none;" id="top-clock"></span>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+
+    <!-- ─── 대시보드 ─── -->
+    <div class="page active" id="pg-dash">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-size:13px;color:#64748b;" id="dash-date"></div>
+        <button onclick="refreshStatus()" style="border:none;background:none;color:#94a3b8;font-size:17px;cursor:pointer;padding:4px;" title="새로고침"><i class="fas fa-sync-alt"></i></button>
+      </div>
+      <div id="emp-tabs"></div>
+    </div>
+
+<div class="page" id="pg-monthly">
+  <div class="card no-print">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <select id="mo-year" style="flex:1;min-width:90px;"><option value="2026">2026년</option><option value="2025">2025년</option></select>
+      <select id="mo-month" style="flex:1;min-width:80px;">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}</select>
+      <button onclick="loadMonthly()" class="btn btn-blue btn-sm" style="width:auto;">조회</button>
+      <button onclick="printMonthly()" class="btn btn-gray btn-sm no-print" style="width:auto;"><i class="fas fa-print"></i> 인쇄</button>
+    </div>
+  </div>
+  <div class="card" style="overflow-x:auto;padding:10px;">
+    <div id="mo-out"></div>
+  </div>
+</div>
+
+<div class="page" id="pg-leave">
+  <div class="card" id="lv-form-area">
+
+    <!-- 공문 스타일: 제목 + 결재란 같은 줄 -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;">
+      <div style="flex:1;text-align:center;padding-top:8px;">
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">산청인애노인통합지원센터</div>
+        <div style="font-size:22px;font-weight:900;letter-spacing:8px;color:#111;">연차사용신청서</div>
+      </div>
+      <!-- 결재란 (공문 스타일) -->
+      <div class="ap-wrap" style="margin:0;flex-shrink:0;">
+        <table class="ap-table">
+          <tr>
+            <th>담&nbsp;당</th>
+            <th>전문사회복지사</th>
+            <th>센&nbsp;터&nbsp;장</th>
+          </tr>
+          <tr>
+            <td><div contenteditable="true" id="sg-1" style="height:52px;"></div></td>
+            <td><div contenteditable="true" id="sg-2" style="height:52px;"></div></td>
+            <td><div contenteditable="true" id="sg-3" style="height:52px;"></div></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <table class="lv-tbl">
+      <tr><th>소&nbsp;&nbsp;속</th><td colspan="3">산청인애노인통합지원센터</td></tr>
+      <tr>
+        <th>신&nbsp;청&nbsp;자</th>
+        <td><select id="lr-emp" style="border:none;padding:0;font-weight:700;font-size:14px;color:#111;background:transparent;"></select></td>
+        <th>직&nbsp;&nbsp;책</th>
+        <td id="lr-pos" style="font-weight:600;">-</td>
+      </tr>
+      <tr>
+        <th>휴가구분</th>
+        <td colspan="3">
+          <select id="lr-type" style="border:none;padding:0;font-weight:700;font-size:14px;color:#111;background:transparent;">
+            <option>연차</option><option>오전반차</option><option>오후반차</option><option>경조휴가</option><option>병가</option><option>공가</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>휴가기간</th>
+        <td><input type="date" id="lr-start" style="border:none;padding:0;font-size:13px;background:transparent;"></td>
+        <th>종&nbsp;료&nbsp;일</th>
+        <td><input type="date" id="lr-end" style="border:none;padding:0;font-size:13px;background:transparent;"></td>
+      </tr>
+      <tr><th>총&nbsp;일&nbsp;수</th><td colspan="3" id="lr-days" style="font-weight:700;color:#111;">-</td></tr>
+      <tr><th>사&nbsp;&nbsp;유</th><td colspan="3"><div id="lr-reason" contenteditable="true" style="min-height:36px;"></div></td></tr>
+      <tr><th>업무인수인계</th><td colspan="3"><div id="lr-handover" contenteditable="true" style="min-height:52px;"></div></td></tr>
+    </table>
+
+    <div style="text-align:center;padding:16px 0 8px;font-size:13px;color:#222;line-height:2;">
+      위와 같이 휴가 사용을 신청합니다.<br>
+      <span id="lr-date" style="font-weight:700;"></span>
+    </div>
+    <div style="text-align:right;font-size:13px;color:#222;margin-bottom:16px;">산청인애노인통합지원센터장 귀중</div>
+
+    <div style="display:flex;gap:8px;" class="no-print">
+      <button onclick="submitLR()" class="btn btn-blue"><i class="fas fa-save"></i> 저장</button>
+      <button onclick="printLeave()" class="btn btn-gray" style="width:auto;padding:11px 16px;"><i class="fas fa-print"></i> 인쇄</button>
+      <button onclick="resetLR()" class="btn btn-gray" style="width:auto;padding:11px 16px;"><i class="fas fa-redo"></i></button>
+    </div>
+  </div>
+
+  <div class="card no-print">
+    <div class="card-title"><i class="fas fa-list"></i>신청 목록 <button onclick="loadLRList()" class="btn btn-gray btn-sm" style="margin-left:auto;"><i class="fas fa-sync-alt"></i></button></div>
+    <div id="lr-list"></div>
+  </div>
+</div>
+
+<div class="page" id="pg-print">
+  <div class="card no-print">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <select id="pr-emp" style="flex:1;min-width:100px;"><option value="">직원선택</option></select>
+      <select id="pr-year" style="flex:1;min-width:80px;"><option value="2026">2026년</option></select>
+      <select id="pr-month" style="flex:1;min-width:70px;">${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}</select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <button onclick="loadPrint()" class="btn btn-blue">미리보기</button>
+      <button onclick="printPersonal()" class="btn btn-gray" style="width:auto;padding:11px 14px;"><i class="fas fa-print"></i> 인쇄</button>
+    </div>
+  </div>
+  <div class="card" style="padding:12px;"><div id="pr-out"></div></div>
+</div>
+
+<div class="page" id="pg-stats">
+  <div class="card">
+    <div class="card-title"><i class="fas fa-calendar-check"></i> 연차 현황</div>
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+      <select id="al-year" style="flex:1;min-width:80px;"><option value="2026">2026년</option><option value="2025">2025년</option></select>
+      <button onclick="loadAnnual()" class="btn btn-blue btn-sm" style="width:auto;">조회</button>
+    </div>
+    <!-- 입사연도 설정 -->
+    <div style="background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:#6b7280;margin-bottom:10px;"><i class="fas fa-edit" style="color:#2563eb;"></i> 입사연도 설정</div>
+      <div id="hire-year-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <div id="al-out" style="overflow-x:auto;"></div>
+    <div style="margin-top:10px;padding:10px;background:#f8fafc;border-radius:8px;font-size:11px;color:#6b7280;line-height:1.7;">
+      · 1년 미만: 매월 1일 (최대 11일) &nbsp;· 1~3년 미만: 15일 &nbsp;· 3년 이상: 2년마다 +1일 (최대 25일)
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pg-emp">
+  <div class="card">
+    <div class="card-title"><i class="fas fa-user-plus"></i> 직원 추가</div>
+    <div class="form-row">
+      <div><label>이름</label><input type="text" id="ne-name" placeholder="홍길동"></div>
+      <div><label>직책</label><input type="text" id="ne-pos" placeholder="사회복지사"></div>
+    </div>
+    <button onclick="addEmp()" class="btn btn-blue"><i class="fas fa-plus"></i> 추가</button>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="fas fa-users"></i> 직원 목록</div>
+    <div id="emp-mgr-list"></div>
+  </div>
+</div>
+
+  </div><!-- /content-wrap -->
+</div><!-- /main-area -->
+</div><!-- /app-shell -->
+
+<!-- ══ 모바일 바텀 탭 ══ -->
+<nav class="bot-nav no-print">
+  <button class="bot-tab active" onclick="goTab('dash',this)" id="m-tab-dash"><i class="fas fa-home"></i>대시보드</button>
+  <button class="bot-tab" onclick="goTab('monthly',this)" id="m-tab-monthly"><i class="fas fa-calendar-alt"></i>근무현황</button>
+  <button class="bot-tab" onclick="goTab('leave',this)" id="m-tab-leave"><i class="fas fa-file-alt"></i>연차신청</button>
+  <button class="bot-tab" onclick="goTab('print',this)" id="m-tab-print"><i class="fas fa-print"></i>출력</button>
+  <button class="bot-tab" onclick="goTab('stats',this)" id="m-tab-stats"><i class="fas fa-chart-bar"></i>통계</button>
+  <button class="bot-tab" onclick="goTab('emp',this)" id="m-tab-emp"><i class="fas fa-users"></i>직원</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+const DAYS=['일','월','화','수','목','금','토']
+const AVCOL=[['#dbeafe','#1d4ed8'],['#dcfce7','#16a34a'],['#fce7f3','#9d174d'],['#fef9c3','#92400e'],['#e0f2fe','#0369a1']]
+let emps=[]
+
+// ── PIN 로그인 ──
+const CORRECT_PIN='8642' // ← 여기서 PIN 변경
+const SESSION_KEY='sancheck_auth'
+const SESSION_TTL=8*60*60*1000 // 8시간 유지
+let pinValue=''
+
+function checkSession(){
+  try{
+    const s=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'{}')
+    if(s.ok && Date.now()-s.ts < SESSION_TTL) return true
+  }catch(e){}
+  return false
+}
+function saveSession(){ sessionStorage.setItem(SESSION_KEY,JSON.stringify({ok:true,ts:Date.now()})) }
+
+function pinInput(d){
+  if(pinValue.length>=4) return
+  pinValue+=d
+  updatePinDots()
+  if(pinValue.length===4) setTimeout(checkPin,120)
+}
+function pinDel(){
+  pinValue=pinValue.slice(0,-1)
+  updatePinDots()
+  document.getElementById('pin-err').textContent=''
+}
+function updatePinDots(){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('pd-'+i)
+    d.classList.toggle('filled',i<pinValue.length)
+    d.classList.remove('error')
+  }
+}
+function checkPin(){
+  if(pinValue===CORRECT_PIN){
+    saveSession()
+    document.getElementById('pin-screen').classList.add('hide')
+    document.getElementById('pin-err').textContent=''
+  } else {
+    for(let i=0;i<4;i++) document.getElementById('pd-'+i).classList.add('error')
+    document.getElementById('pin-err').textContent='PIN이 틀렸습니다. 다시 입력하세요.'
+    setTimeout(()=>{ pinValue=''; updatePinDots() },700)
+  }
+}
+// 키보드 입력 지원 (PC)
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('pin-screen').classList.contains('hide')) return
+  if(e.key>='0'&&e.key<='9') pinInput(e.key)
+  if(e.key==='Backspace') pinDel()
+})
+// 세션 확인 → 이미 로그인돼 있으면 바로 스킵
+if(checkSession()) document.getElementById('pin-screen').classList.add('hide')
+
+// 시계 + 날짜 표시 (PC 사이드바 & 모바일 상단 동시)
+const PAGE_TITLES={dash:'대시보드',monthly:'근무현황',leave:'연차신청',print:'개인출력',stats:'연차현황',emp:'직원관리'}
+;(function tick(){
+  const n=new Date()
+  const h=String(n.getHours()).padStart(2,'0'),mi=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0')
+  const t=h+':'+mi+':'+s
+  const el=document.getElementById('hClock'); if(el) el.textContent=t
+  const tc=document.getElementById('top-clock'); if(tc) tc.textContent=t
+  setTimeout(tick,1000)
+})()
+
+// 탭 전환 (PC 사이드바 + 모바일 바텀 동시 처리)
+function goTab(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  document.querySelectorAll('.s-nav-item,.bot-tab').forEach(b=>b.classList.remove('active'))
+  document.getElementById('pg-'+name).classList.add('active')
+  // 사이드바 + 바텀탭 동시 활성화
+  const sEl=document.getElementById('tab-'+name); if(sEl) sEl.classList.add('active')
+  const mEl=document.getElementById('m-tab-'+name); if(mEl) mEl.classList.add('active')
+  // 상단 페이지 타이틀
+  const mt=document.getElementById('main-title'); if(mt) mt.textContent=PAGE_TITLES[name]||''
+  if(name==='monthly') loadMonthly()
+  if(name==='stats'){renderHireYearList();loadAnnual()}
+  if(name==='leave'){loadLRList()}
+  if(name==='emp') renderEmpMgr()
+}
+
+// 직원 로드
+async function loadEmps(){
+  const r=await fetch('/api/employees'); const d=await r.json(); emps=d.data||[]
+  ;['pr-emp','lr-emp'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return
+    const pv=el.value; el.innerHTML='<option value="">선택</option>'
+    emps.forEach(e=>el.innerHTML+=\`<option value="\${e.id}">\${e.name}</option>\`)
+    if(pv) el.value=pv
+  })
+  const lrEl=document.getElementById('lr-emp')
+  if(lrEl){
+    lrEl.onchange=function(){
+      const e=emps.find(x=>x.id==this.value)
+      document.getElementById('lr-pos').textContent=e?e.position:'-'
+    }
+    if(emps.length){lrEl.value=emps[0].id;lrEl.dispatchEvent(new Event('change'))}
+  }
+  renderEmpCards()
+  renderEmpMgr()
+}
+
+function renderEmpCards(){
+  const c=document.getElementById('emp-tabs'); if(!c) return
+  const today=new Date().toISOString().slice(0,10)
+  c.innerHTML=emps.map((e,i)=>{
+    const [bg,fg]=AVCOL[i%AVCOL.length]
+    return \`<div class="emp-item" id="ec-\${e.id}">
+      <div class="emp-head" onclick="toggleEmp(\${e.id})">
+        <div class="emp-av" style="background:\${bg};color:\${fg};">\${e.name[0]}</div>
+        <div class="emp-info">
+          <div class="emp-nm">\${e.name}</div>
+          <div class="emp-ps">\${e.position||''}</div>
+        </div>
+        <div class="emp-right">
+          <div id="ec-bdg-\${e.id}"><span class="bdg bdg-미등록">미등록</span></div>
+          <div class="emp-time-txt" id="ec-time-\${e.id}"></div>
+        </div>
+        <i class="fas fa-chevron-down emp-chevron"></i>
+      </div>
+      <div class="stt-panel" id="sp-\${e.id}">
+        <div class="stt-date-row">
+          <div><div class="stt-date-label">날짜</div><input type="date" id="sh-date-\${e.id}" value="\${today}"></div>
+          <div><div class="stt-date-label">시간</div><input type="time" id="sh-time-\${e.id}"></div>
+        </div>
+        <div class="stt-grid">
+          <button class="stt-btn stt-출근" onclick="quickReg(\${e.id},'출근',this)"><i class="fas fa-sign-in-alt"></i>출근</button>
+          <button class="stt-btn stt-퇴근" onclick="quickReg(\${e.id},'퇴근',this)"><i class="fas fa-sign-out-alt"></i>퇴근</button>
+          <button class="stt-btn stt-오전반차" onclick="quickReg(\${e.id},'오전반차',this)"><i class="fas fa-hourglass-start"></i>오전반차</button>
+          <button class="stt-btn stt-오후반차" onclick="quickReg(\${e.id},'오후반차',this)"><i class="fas fa-hourglass-end"></i>오후반차</button>
+          <button class="stt-btn stt-연차" onclick="quickReg(\${e.id},'연차',this)"><i class="fas fa-umbrella-beach"></i>연차</button>
+          <button class="stt-btn stt-병가" onclick="quickReg(\${e.id},'병가',this)"><i class="fas fa-procedures"></i>병가</button>
+          <button class="stt-btn stt-경조휴가" onclick="quickReg(\${e.id},'경조휴가',this)"><i class="fas fa-heart"></i>경조휴가</button>
+          <button class="stt-btn stt-공가" onclick="quickReg(\${e.id},'공가',this)"><i class="fas fa-landmark"></i>공가</button>
+        </div>
+      </div>
+    </div>\

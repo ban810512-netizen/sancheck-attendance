@@ -1,17 +1,18 @@
 {
   "name": "sancheck-attendance",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "start": "node server.js",
+    "build": "echo 'build ok'",
+    "dev": "node server.js",
     "dev:sandbox": "wrangler pages dev dist --d1=sancheck-production --local --ip 0.0.0.0 --port 3000",
-    "build": "vite build",
-    "preview": "wrangler pages dev",
-    "deploy": "npm run build && wrangler pages deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
-    "db:migrate:local": "wrangler d1 migrations apply sancheck-production --local",
-    "db:reset": "rm -rf .wrangler/state/v3/d1 && npm run db:migrate:local"
+    "cf-build": "vite build",
+    "cf-deploy": "npm run cf-build && wrangler pages deploy"
   },
   "dependencies": {
+    "better-sqlite3": "^9.6.0",
+    "express": "^4.22.1",
     "hono": "^4.12.11"
   },
   "devDependencies": {
