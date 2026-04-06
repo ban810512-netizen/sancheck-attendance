@@ -337,7 +337,7 @@ function getHTML(): string {
         <i class="fas fa-chart-bar mr-1"></i>통계
       </button>
       <button onclick="showTab('employees')" id="tab-employees" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-users mr-1"></i>직원 관리
+        <i class="fas fa-users-cog mr-1"></i>직원 관리
       </button>
     </div>
   </div>
@@ -347,72 +347,56 @@ function getHTML(): string {
 
 <!-- ════════════════ 대시보드 탭 ════════════════ -->
 <div id="page-dashboard">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- 날짜 표시 -->
+  <div class="mb-4 text-center">
+    <span id="today-date-label" class="text-base text-gray-600 font-medium"></span>
+  </div>
 
-    <!-- 출퇴근 등록 패널 -->
-    <div class="lg:col-span-1 bg-white rounded-2xl shadow-md p-5">
-      <h2 class="text-lg font-bold text-blue-900 mb-4 flex items-center">
-        <i class="fas fa-clock mr-2 text-blue-500"></i>출퇴근 등록
+  <!-- 직원 카드 그리드 -->
+  <div id="emp-cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6"></div>
+
+  <!-- 출퇴근 등록 패널 (카드 클릭 시 표시) -->
+  <div id="reg-panel" style="display:none" class="bg-white rounded-2xl shadow-lg p-5 border-2 border-blue-300">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-bold text-blue-900">
+        <i class="fas fa-clock mr-2 text-blue-500"></i>출퇴근 등록 —
+        <span id="reg-emp-name" class="text-blue-600"></span>
       </h2>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-600 mb-1">직원 선택</label>
-        <select id="reg-employee" class="text-sm">
-          <option value="">-- 직원 선택 --</option>
-        </select>
-      </div>
-      <div class="mb-4">
+      <button onclick="closeRegPanel()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
         <label class="block text-sm font-medium text-gray-600 mb-1">날짜</label>
         <input type="date" id="reg-date" class="text-sm">
       </div>
-      <div class="mb-4">
+      <div>
         <label class="block text-sm font-medium text-gray-600 mb-1">시간 (HH:MM)</label>
         <input type="text" id="reg-time" placeholder="08:35" maxlength="5" class="text-sm">
       </div>
-      <div class="mb-5">
-        <label class="block text-sm font-medium text-gray-600 mb-2">상태 선택</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="setStatus('출근')" class="status-btn status-출근 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-green-400 transition">출근</button>
-          <button onclick="setStatus('퇴근')" class="status-btn status-퇴근 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-blue-400 transition">퇴근</button>
-          <button onclick="setStatus('오전반차')" class="status-btn status-오전반차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-purple-400 transition">오전반차</button>
-          <button onclick="setStatus('오후반차')" class="status-btn status-오후반차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-pink-400 transition">오후반차</button>
-          <button onclick="setStatus('연차')" class="status-btn status-연차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-yellow-400 transition">연차</button>
-          <button onclick="setStatus('병가')" class="status-btn status-병가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-red-400 transition">병가</button>
-          <button onclick="setStatus('경조휴가')" class="status-btn status-경조휴가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-orange-400 transition">경조휴가</button>
-          <button onclick="setStatus('공가')" class="status-btn status-공가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-sky-400 transition">공가</button>
-        </div>
-        <input type="hidden" id="reg-status" value="">
-      </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-600 mb-1">메모 (선택)</label>
-        <input type="text" id="reg-note" placeholder="비고 입력" class="text-sm">
-      </div>
-      <div id="reg-status-display" class="mb-3 text-center text-sm font-semibold text-gray-500 h-6"></div>
-      <button onclick="submitAttendance()" class="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-bold text-base transition">
-        <i class="fas fa-check-circle mr-2"></i>등록하기
-      </button>
     </div>
-
-    <!-- 오늘 현황 -->
-    <div class="lg:col-span-2 bg-white rounded-2xl shadow-md p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-blue-900">
-          <i class="fas fa-list-check mr-2 text-blue-500"></i>오늘 근무 현황
-        </h2>
-        <span id="today-date-label" class="text-sm text-gray-500 font-medium"></span>
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-600 mb-2">상태 선택</label>
+      <div class="grid grid-cols-4 gap-2">
+        <button onclick="setStatus('출근')" class="status-btn status-출근 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-green-400 transition">출근</button>
+        <button onclick="setStatus('퇴근')" class="status-btn status-퇴근 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-blue-400 transition">퇴근</button>
+        <button onclick="setStatus('오전반차')" class="status-btn status-오전반차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-purple-400 transition">오전반차</button>
+        <button onclick="setStatus('오후반차')" class="status-btn status-오후반차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-pink-400 transition">오후반차</button>
+        <button onclick="setStatus('연차')" class="status-btn status-연차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-yellow-400 transition">연차</button>
+        <button onclick="setStatus('병가')" class="status-btn status-병가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-red-400 transition">병가</button>
+        <button onclick="setStatus('경조휴가')" class="status-btn status-경조휴가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-orange-400 transition">경조휴가</button>
+        <button onclick="setStatus('공가')" class="status-btn status-공가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-sky-400 transition">공가</button>
       </div>
-      <div id="today-list" class="space-y-3">
-        <div class="text-center text-gray-400 py-8"><i class="fas fa-spinner fa-spin mr-2"></i>로딩 중...</div>
-      </div>
-
-      <!-- 이번달 요약 -->
-      <div class="mt-6 border-t pt-4">
-        <h3 class="font-bold text-blue-800 mb-3 text-sm">
-          <i class="fas fa-chart-pie mr-1"></i>이번 달 휴가 현황
-        </h3>
-        <div id="month-summary" class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-        </div>
-      </div>
+      <input type="hidden" id="reg-status" value="">
+      <input type="hidden" id="reg-employee" value="">
     </div>
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-600 mb-1">메모 (선택)</label>
+      <input type="text" id="reg-note" placeholder="비고 입력" class="text-sm">
+    </div>
+    <div id="reg-status-display" class="mb-3 text-center text-sm font-semibold text-gray-500 h-6"></div>
+    <button onclick="submitAttendance()" class="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-bold text-base transition">
+      <i class="fas fa-check-circle mr-2"></i>등록하기
+    </button>
   </div>
 </div>
 
@@ -436,52 +420,6 @@ function getHTML(): string {
       </button>
     </div>
     <div id="monthly-table" class="overflow-x-auto"></div>
-  </div>
-</div>
-
-<!-- ════════════════ 통계 탭 ════════════════ -->
-<div id="page-stats" class="hidden">
-  <div class="bg-white rounded-2xl shadow-md p-5">
-    <div class="flex flex-wrap items-center gap-3 mb-5">
-      <h2 class="text-lg font-bold text-blue-900 flex-1">
-        <i class="fas fa-chart-bar mr-2 text-blue-500"></i>근무 통계
-      </h2>
-      <select id="stats-year" class="text-sm w-28">
-        <option value="2026" selected>2026년</option>
-        <option value="2025">2025년</option>
-      </select>
-      <select id="stats-month" class="text-sm w-24">
-        <option value="">연간 통계</option>
-        ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
-      </select>
-      <button onclick="loadStats()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">조회</button>
-    </div>
-    <div id="stats-table"></div>
-  </div>
-</div>
-
-<!-- ════════════════ 개인별 출력 탭 ════════════════ -->
-<div id="page-print" class="hidden">
-  <div class="bg-white rounded-2xl shadow-md p-5">
-    <div class="flex flex-wrap items-center gap-3 mb-5 no-print">
-      <h2 class="text-lg font-bold text-blue-900 flex-1">
-        <i class="fas fa-print mr-2 text-blue-500"></i>개인별 출력
-      </h2>
-      <select id="print-employee" class="text-sm w-32">
-        <option value="">직원 선택</option>
-      </select>
-      <select id="print-year" class="text-sm w-28">
-        <option value="2026" selected>2026년</option>
-      </select>
-      <select id="print-month" class="text-sm w-24">
-        ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
-      </select>
-      <button onclick="loadPrint()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">미리보기</button>
-      <button onclick="window.print()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 no-print">
-        <i class="fas fa-print mr-1"></i>인쇄
-      </button>
-    </div>
-    <div id="print-area"></div>
   </div>
 </div>
 
@@ -544,6 +482,52 @@ function getHTML(): string {
       </div>
       <div id="leave-list"></div>
     </div>
+  </div>
+</div>
+
+<!-- ════════════════ 개인별 출력 탭 ════════════════ -->
+<div id="page-print" class="hidden">
+  <div class="bg-white rounded-2xl shadow-md p-5">
+    <div class="flex flex-wrap items-center gap-3 mb-5 no-print">
+      <h2 class="text-lg font-bold text-blue-900 flex-1">
+        <i class="fas fa-print mr-2 text-blue-500"></i>개인별 출력
+      </h2>
+      <select id="print-employee" class="text-sm w-32">
+        <option value="">직원 선택</option>
+      </select>
+      <select id="print-year" class="text-sm w-28">
+        <option value="2026" selected>2026년</option>
+      </select>
+      <select id="print-month" class="text-sm w-24">
+        ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
+      </select>
+      <button onclick="loadPrint()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">미리보기</button>
+      <button onclick="window.print()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 no-print">
+        <i class="fas fa-print mr-1"></i>인쇄
+      </button>
+    </div>
+    <div id="print-area"></div>
+  </div>
+</div>
+
+<!-- ════════════════ 통계 탭 ════════════════ -->
+<div id="page-stats" class="hidden">
+  <div class="bg-white rounded-2xl shadow-md p-5">
+    <div class="flex flex-wrap items-center gap-3 mb-5">
+      <h2 class="text-lg font-bold text-blue-900 flex-1">
+        <i class="fas fa-chart-bar mr-2 text-blue-500"></i>근무 통계
+      </h2>
+      <select id="stats-year" class="text-sm w-28">
+        <option value="2026" selected>2026년</option>
+        <option value="2025">2025년</option>
+      </select>
+      <select id="stats-month" class="text-sm w-24">
+        <option value="">연간 통계</option>
+        ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
+      </select>
+      <button onclick="loadStats()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">조회</button>
+    </div>
+    <div id="stats-table"></div>
   </div>
 </div>
 
