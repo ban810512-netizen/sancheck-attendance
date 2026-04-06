@@ -531,58 +531,14 @@ const DAYS=['일','월','화','수','목','금','토']
 const AVCOL=[['#dbeafe','#1d4ed8'],['#dcfce7','#16a34a'],['#fce7f3','#9d174d'],['#fef9c3','#92400e'],['#e0f2fe','#0369a1']]
 let emps=[]
 
-// ── PIN 로그인 ──
-const CORRECT_PIN='8642' // ← 여기서 PIN 변경
-const SESSION_KEY='sancheck_auth'
-const SESSION_TTL=8*60*60*1000 // 8시간 유지
-let pinValue=''
-
-function checkSession(){
-  try{
-    const s=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'{}')
-    if(s.ok && Date.now()-s.ts < SESSION_TTL) return true
-  }catch(e){}
-  return false
-}
-function saveSession(){ sessionStorage.setItem(SESSION_KEY,JSON.stringify({ok:true,ts:Date.now()})) }
-
-function pinInput(d){
-  if(pinValue.length>=4) return
-  pinValue+=d
-  updatePinDots()
-  if(pinValue.length===4) setTimeout(checkPin,120)
-}
-function pinDel(){
-  pinValue=pinValue.slice(0,-1)
-  updatePinDots()
-  document.getElementById('pin-err').textContent=''
-}
-function updatePinDots(){
-  for(let i=0;i<4;i++){
-    const d=document.getElementById('pd-'+i)
-    d.classList.toggle('filled',i<pinValue.length)
-    d.classList.remove('error')
-  }
-}
-function checkPin(){
-  if(pinValue===CORRECT_PIN){
-    saveSession()
-    document.getElementById('pin-screen').classList.add('hide')
-    document.getElementById('pin-err').textContent=''
-  } else {
-    for(let i=0;i<4;i++) document.getElementById('pd-'+i).classList.add('error')
-    document.getElementById('pin-err').textContent='PIN이 틀렸습니다. 다시 입력하세요.'
-    setTimeout(()=>{ pinValue=''; updatePinDots() },700)
-  }
-}
-// 키보드 입력 지원 (PC)
-document.addEventListener('keydown',e=>{
-  if(document.getElementById('pin-screen').classList.contains('hide')) return
-  if(e.key>='0'&&e.key<='9') pinInput(e.key)
-  if(e.key==='Backspace') pinDel()
-})
-// 세션 확인 → 이미 로그인돼 있으면 바로 스킵
-if(checkSession()) document.getElementById('pin-screen').classList.add('hide')
+// ── PIN 비활성화 (바로 접속) ──
+function checkSession(){ return true }
+function saveSession(){}
+function pinInput(){}
+function pinDel(){}
+function updatePinDots(){}
+// PIN 화면 바로 숨김
+document.getElementById('pin-screen').classList.add('hide')
 
 // 시계 + 날짜 표시 (PC 사이드바 & 모바일 상단 동시)
 const PAGE_TITLES={dash:'대시보드',monthly:'근무현황',leave:'연차신청',print:'개인출력',stats:'연차현황',emp:'직원관리'}
@@ -1111,19 +1067,8 @@ async function initApp(){
   await loadEmps()
 }
 
-// PIN 검증 (최종 버전 - 초기화 포함)
-checkPin=async function(){
-  if(pinValue===CORRECT_PIN){
-    saveSession()
-    document.getElementById('pin-screen').classList.add('hide')
-    document.getElementById('pin-err').textContent=''
-    await initApp()
-  } else {
-    for(let i=0;i<4;i++) document.getElementById('pd-'+i).classList.add('error')
-    document.getElementById('pin-err').textContent='PIN이 틀렸습니다. 다시 입력하세요.'
-    setTimeout(()=>{ pinValue=''; updatePinDots() },700)
-  }
-}
+// PIN 비활성화
+async function checkPin(){ await initApp() }
 
 // 페이지 로드 시: 세션 있으면 바로 초기화, 없으면 PIN 대기
 ;(async()=>{ if(checkSession()) await initApp() })()
