@@ -562,7 +562,7 @@ function goTab(name,el){
   // 상단 페이지 타이틀
   const mt=document.getElementById('main-title'); if(mt) mt.textContent=PAGE_TITLES[name]||''
   if(name==='monthly') loadMonthly()
-  if(name==='stats'){renderHireYearList();loadAnnual()}
+  if(name==='stats'){renderHireYearList().then(()=>loadAnnual())}
   if(name==='leave'){loadLRList()}
   if(name==='emp') renderEmpMgr()
 }
@@ -745,15 +745,23 @@ async function loadMonthly(){
 }
 
 // 연차 현황
-// 입사연도 저장소 (localStorage 사용)
-function getHireYears(){
-  try{ return JSON.parse(localStorage.getItem('hireYears')||'{}') }catch(e){ return {} }
+// 입사연도 저장소 (서버 DB 사용)
+let _hireYearsCache = {}
+async function getHireYears(){
+  try{
+    const r = await fetch('/api/hire-years'); const d = await r.json()
+    _hireYearsCache = d.data || {}
+  }catch(e){}
+  return _hireYearsCache
 }
-function saveHireYears(obj){ localStorage.setItem('hireYears',JSON.stringify(obj)) }
+async function saveHireYear(empId, year){
+  await fetch('/api/hire-years',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({employee_id:empId,hire_year:year})})
+  _hireYearsCache[empId] = year
+}
 
-function renderHireYearList(){
+async function renderHireYearList(){
   const c=document.getElementById('hire-year-list'); if(!c) return
-  const hy=getHireYears()
+  const hy=await getHireYears()
   const curYear=new Date().getFullYear()
   c.innerHTML=emps.map(e=>{
     const defY=hy[e.id]||curYear
@@ -768,10 +776,9 @@ function renderHireYearList(){
   }).join('')
 }
 
-function onHireYearChange(empId, year){
-  const hy=getHireYears()
-  hy[empId]=parseInt(year)
-  saveHireYears(hy)
+async function onHireYearChange(empId, year){
+  await saveHireYear(parseInt(empId), parseInt(year))
+  toast('입사연도 저장 완료!','s')
   loadAnnual()
 }
 
@@ -785,7 +792,7 @@ async function loadAnnual(){
   const year=document.getElementById('al-year').value
   const r=await fetch('/api/stats/yearly?year='+year); const d=await r.json()
   const c=document.getElementById('al-out'); if(!c||!d.data) return
-  const hy=getHireYears()
+  const hy=await getHireYears()
   let html=\`<div style="overflow-x:auto;"><table class="st-tbl"><thead><tr>
     <th style="text-align:left;">성명</th><th>입사</th><th>발생일수</th><th>사용</th><th>잔여</th><th>사용률</th>
   </tr></thead><tbody>\`

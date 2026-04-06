@@ -456,7 +456,7 @@ function goTab(name,el){
   // 상단 페이지 타이틀
   const mt=document.getElementById('main-title'); if(mt) mt.textContent=PAGE_TITLES[name]||''
   if(name==='monthly') loadMonthly()
-  if(name==='stats'){renderHireYearList();loadAnnual()}
+  if(name==='stats'){renderHireYearList().then(()=>loadAnnual())}
   if(name==='leave'){loadLRList()}
   if(name==='emp') renderEmpMgr()
 }
