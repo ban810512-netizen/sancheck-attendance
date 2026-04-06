@@ -327,14 +327,14 @@ function getHTML(): string {
       <button onclick="showTab('monthly')" id="tab-monthly" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
         <i class="fas fa-calendar-alt mr-1"></i>월별 근무현황
       </button>
-      <button onclick="showTab('stats')" id="tab-stats" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-chart-bar mr-1"></i>통계
+      <button onclick="showTab('leave')" id="tab-leave" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
+        <i class="fas fa-file-alt mr-1"></i>연차 신청서
       </button>
       <button onclick="showTab('print')" id="tab-print" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
         <i class="fas fa-print mr-1"></i>개인별 출력
       </button>
-      <button onclick="showTab('leave')" id="tab-leave" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-file-alt mr-1"></i>연차 신청서
+      <button onclick="showTab('stats')" id="tab-stats" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
+        <i class="fas fa-chart-bar mr-1"></i>통계
       </button>
       <button onclick="showTab('employees')" id="tab-employees" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
         <i class="fas fa-users mr-1"></i>직원 관리
@@ -605,8 +605,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   startClock()
   setDefaultDate()
   await loadEmployees()
-  loadTodayAttendance()
-  loadMonthSummary()
 })
 
 function startClock() {
@@ -634,13 +632,73 @@ function setDefaultDate() {
   }
 }
 
+// ═══════════════════════════════════════════════════
+// 직원 카드 (대시보드)
+// ═══════════════════════════════════════════════════
+function renderEmpCards() {
+  const container = document.getElementById('emp-cards')
+  if(!container) return
+  container.innerHTML = employees.map(e => \`
+    <div onclick="openRegPanel(\${e.id},'\${e.name}')"
+      class="bg-white rounded-2xl shadow-md p-5 cursor-pointer hover:shadow-lg hover:border-blue-400 border-2 border-transparent transition-all select-none"
+      id="emp-card-\${e.id}">
+      <div class="flex flex-col items-center gap-2">
+        <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-800">
+          \${e.name.charAt(0)}
+        </div>
+        <div class="font-bold text-gray-800 text-base">\${e.name}</div>
+        <div class="text-xs text-gray-400">\${e.position||''}</div>
+        <div id="emp-card-status-\${e.id}" class="mt-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-400">미등록</div>
+      </div>
+    </div>
+  \`).join('')
+  loadCardStatuses()
+}
+
+async function loadCardStatuses() {
+  const r = await fetch('/api/attendance/today')
+  const data = await r.json()
+  if(!data.data) return
+  data.data.forEach(a => {
+    const el = document.getElementById('emp-card-status-'+a.employee_id)
+    if(!el || !a.status) return
+    const sc = STATUS_COLORS[a.status] || 'bg-gray-100 text-gray-400'
+    el.className = 'mt-1 px-3 py-1 rounded-full text-xs font-semibold '+sc
+    el.textContent = a.status
+    const card = document.getElementById('emp-card-'+a.employee_id)
+    if(card && a.status==='출근') card.classList.add('border-green-300')
+  })
+}
+
+function openRegPanel(id, name) {
+  document.getElementById('reg-employee').value = id
+  document.getElementById('reg-emp-name').textContent = name
+  document.getElementById('reg-status').value = ''
+  document.getElementById('reg-status-display').textContent = ''
+  document.getElementById('reg-status-display').className = 'mb-3 text-center text-sm font-semibold text-gray-500 h-6'
+  document.getElementById('reg-note').value = ''
+  document.getElementById('reg-time').disabled = false
+  document.querySelectorAll('.status-btn').forEach(btn => btn.style.outline='')
+  const today = new Date().toISOString().slice(0,10)
+  document.getElementById('reg-date').value = today
+  const now = new Date()
+  document.getElementById('reg-time').value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')
+  document.getElementById('reg-panel').style.display = ''
+  document.getElementById('reg-panel').scrollIntoView({behavior:'smooth', block:'nearest'})
+}
+
+function closeRegPanel() {
+  document.getElementById('reg-panel').style.display = 'none'
+  document.getElementById('reg-employee').value = ''
+}
+
 async function loadEmployees() {
   const r = await fetch('/api/employees')
   const data = await r.json()
   employees = data.data || []
 
-  // 모든 직원 셀렉트 채우기
-  const selects = ['reg-employee','print-employee','lr-employee']
+  // 셀렉트 채우기 (print, leave 탭용)
+  const selects = ['print-employee','lr-employee']
   selects.forEach(id => {
     const el = document.getElementById(id)
     if(!el) return
@@ -651,6 +709,7 @@ async function loadEmployees() {
     })
     if(prev) el.value = prev
   })
+  renderEmpCards()
   renderEmployeeList()
 }
 
@@ -734,54 +793,11 @@ async function submitAttendance() {
   const data = await r.json()
   if(data.ok) {
     showToast('등록 완료!','success')
-    loadTodayAttendance()
-    loadMonthSummary()
+    closeRegPanel()
+    renderEmpCards()
   } else {
     showToast(data.error||'오류 발생','error')
   }
-}
-
-async function loadTodayAttendance() {
-  const r = await fetch('/api/attendance/today')
-  const data = await r.json()
-  const list = document.getElementById('today-list')
-  if(!data.data || data.data.length===0) {
-    list.innerHTML='<div class="text-center text-gray-400 py-4">오늘 등록된 기록이 없습니다</div>'
-    return
-  }
-  list.innerHTML = data.data.map(a => {
-    const sc = STATUS_COLORS[a.status] || 'bg-gray-100 text-gray-500'
-    return \`<div class="flex items-center justify-between p-3 rounded-xl border \${sc.split(' ')[0]==='status-출근'?'border-green-200':'border-gray-100'}">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-800 text-sm">\${a.name.charAt(0)}</div>
-        <div>
-          <div class="font-semibold text-gray-800">\${a.name}</div>
-          <div class="text-xs text-gray-500">\${a.position||''}</div>
-        </div>
-      </div>
-      <div class="text-right">
-        <span class="inline-block px-2 py-1 rounded-full text-xs font-medium \${sc}">\${a.status||'미등록'}</span>
-        \${a.check_in ? '<div class="text-xs text-gray-500 mt-1">출근 '+a.check_in+'</div>' : ''}
-        \${a.check_out ? '<div class="text-xs text-gray-500">퇴근 '+a.check_out+'</div>' : ''}
-      </div>
-    </div>\`
-  }).join('')
-}
-
-async function loadMonthSummary() {
-  const now = new Date()
-  const r = await fetch(\`/api/stats/monthly?year=\${now.getFullYear()}&month=\${now.getMonth()+1}\`)
-  const data = await r.json()
-  const el = document.getElementById('month-summary')
-  if(!el || !data.data) return
-  el.innerHTML = data.data.map(d => \`
-    <div class="bg-gray-50 rounded-xl p-3 text-center">
-      <div class="font-bold text-gray-800 text-sm mb-1">\${d.name}</div>
-      <div class="text-xs text-gray-500">출근 <span class="text-green-600 font-bold">\${d.work_count}</span>일</div>
-      <div class="text-xs text-gray-500">연차 <span class="text-yellow-600 font-bold">\${d.annual_leave}</span>일</div>
-      <div class="text-xs text-gray-500">반차 <span class="text-purple-600 font-bold">\${d.am_half+d.pm_half}</span>회</div>
-    </div>
-  \`).join('')
 }
 
 // ═══════════════════════════════════════════════════
@@ -1240,9 +1256,9 @@ function renderEmployeeList() {
         </tr>
       </thead>
       <tbody>
-        \${employees.map(e=>\`
+        \${employees.map((e,idx)=>\`
           <tr id="emp-row-\${e.id}">
-            <td class="text-center text-gray-500">\${e.id}</td>
+            <td class="text-center text-gray-500">\${idx+1}</td>
             <td>
               <span id="emp-name-text-\${e.id}" class="font-medium">\${e.name}</span>
               <input id="emp-name-input-\${e.id}" type="text" value="\${e.name}"
