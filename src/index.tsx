@@ -241,354 +241,536 @@ function getKSTDateStr(): string {
   return kst.toISOString().slice(0, 10)
 }
 
+
 function getHTML(): string {
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>산청인애노인통합지원센터 근무상황부</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
-    * { font-family: 'Noto Sans KR', sans-serif; }
-    .tab-active { background: #1e40af; color: white; }
-    .status-출근 { background:#dcfce7; color:#166534; }
-    .status-퇴근 { background:#dbeafe; color:#1e40af; }
-    .status-연차 { background:#fef3c7; color:#92400e; }
-    .status-오전반차 { background:#ede9fe; color:#5b21b6; }
-    .status-오후반차 { background:#fce7f3; color:#9d174d; }
-    .status-병가 { background:#fee2e2; color:#991b1b; }
-    .status-경조휴가 { background:#ffedd5; color:#9a3412; }
-    .status-공가 { background:#e0f2fe; color:#075985; }
-    .status-휴무 { background:#f3f4f6; color:#6b7280; }
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white; }
-      .print-area { page-break-inside: avoid; }
-    }
-    .modal-bg { background: rgba(0,0,0,0.5); }
-    .clock { font-size: 2.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-    input[type="text"], input[type="date"], select, textarea {
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.375rem 0.5rem;
-      width: 100%;
-      font-size: 0.875rem;
-    }
-    .sign-box {
-      border: 1px solid #d1d5db;
-      border-radius: 0.375rem;
-      padding: 0.5rem;
-      min-height: 60px;
-      cursor: text;
-    }
-    .approval-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border: 2px solid #1e40af;
-    }
-    .approval-cell {
-      border: 1px solid #93c5fd;
-      text-align: center;
-      padding: 0.5rem;
-    }
-    table.print-table { border-collapse: collapse; width: 100%; }
-    table.print-table th, table.print-table td {
-      border: 1px solid #94a3b8;
-      padding: 4px 6px;
-      font-size: 12px;
-      text-align: center;
-    }
-    table.print-table th { background: #e2e8f0; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>산청인애노인통합지원센터 근무상황부</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap');
+*{font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;}
+:root{
+  --primary:#2563eb;--primary-dark:#1d4ed8;--primary-light:#eff6ff;
+  --success:#16a34a;--warning:#d97706;--danger:#dc2626;--info:#0891b2;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-600:#4b5563;--gray-800:#1f2937;
+}
+/* 상태 배지 */
+.badge{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;}
+.badge-출근{background:#dcfce7;color:#15803d;}
+.badge-퇴근{background:#dbeafe;color:#1d4ed8;}
+.badge-연차{background:#fef3c7;color:#b45309;}
+.badge-오전반차{background:#ede9fe;color:#6d28d9;}
+.badge-오후반차{background:#fce7f3;color:#9d174d;}
+.badge-병가{background:#fee2e2;color:#b91c1c;}
+.badge-경조휴가{background:#ffedd5;color:#c2410c;}
+.badge-공가{background:#e0f2fe;color:#0369a1;}
+.badge-휴무{background:#f3f4f6;color:#6b7280;}
+.badge-미등록{background:#f1f5f9;color:#94a3b8;}
+
+/* 탭 */
+.tab-btn{padding:10px 20px;font-size:14px;font-weight:500;border-radius:8px;cursor:pointer;border:none;background:transparent;color:#6b7280;transition:all .2s;white-space:nowrap;}
+.tab-btn:hover{background:#f1f5f9;color:#1e40af;}
+.tab-btn.active{background:#2563eb;color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.3);}
+
+/* 카드 */
+.card{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);border:1px solid #f1f5f9;}
+.stat-card{border-radius:14px;padding:20px 24px;position:relative;overflow:hidden;}
+
+/* 직원 카드 */
+.emp-card{background:#fff;border-radius:16px;border:2px solid #e5e7eb;padding:20px 16px;cursor:pointer;transition:all .22s;text-align:center;position:relative;}
+.emp-card:hover{border-color:#2563eb;box-shadow:0 8px 24px rgba(37,99,235,.15);transform:translateY(-2px);}
+.emp-card.selected{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+.emp-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin:0 auto 10px;}
+
+/* 등록 패널 */
+.reg-panel{background:#fff;border-radius:16px;border:2px solid #2563eb;box-shadow:0 8px 32px rgba(37,99,235,.12);padding:24px;margin-top:16px;}
+.status-pill{padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:2px solid transparent;transition:all .15s;text-align:center;}
+.status-pill:hover{transform:scale(1.04);}
+.status-pill.selected{border-color:#1d4ed8;box-shadow:0 0 0 2px rgba(37,99,235,.3);}
+
+/* 인쇄 스타일 */
+@media print{
+  .no-print{display:none!important;}
+  body{background:#fff;}
+  .page-break{page-break-after:always;}
+  /* 연차신청서 인쇄 */
+  .leave-form-print{font-family:'Noto Sans KR',sans-serif;}
+}
+
+/* 연차신청서 */
+.approval-wrap{display:flex;justify-content:flex-end;margin-bottom:16px;}
+.approval-table{border-collapse:collapse;width:280px;}
+.approval-table th,.approval-table td{border:1px solid #374151;padding:0;text-align:center;}
+.approval-table .ap-label{background:#e5e7eb;font-size:11px;font-weight:700;padding:5px;color:#374151;}
+.approval-table .ap-sign{height:64px;font-size:12px;vertical-align:top;padding:4px;position:relative;}
+.approval-table .ap-date{font-size:10px;color:#6b7280;border-top:1px solid #d1d5db;padding:3px;background:#fafafa;}
+
+.form-table{border-collapse:collapse;width:100%;margin-bottom:12px;}
+.form-table th,.form-table td{border:1px solid #374151;padding:8px 12px;font-size:13px;}
+.form-table th{background:#f8fafc;font-weight:700;color:#1e40af;white-space:nowrap;width:130px;text-align:left;}
+.form-table td{color:#111827;}
+.form-table [contenteditable]{outline:none;min-height:20px;}
+.form-table [contenteditable]:focus{background:#fffbeb;}
+
+/* 통계 테이블 */
+.stats-tbl{border-collapse:collapse;width:100%;}
+.stats-tbl th{background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;padding:10px 14px;font-size:12px;font-weight:600;text-align:center;}
+.stats-tbl td{padding:9px 14px;font-size:13px;text-align:center;border-bottom:1px solid #f1f5f9;}
+.stats-tbl tr:hover td{background:#f8fafc;}
+.stats-tbl .name-cell{font-weight:700;color:#1e40af;text-align:left;}
+.progress-bar{height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden;}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width .4s;}
+
+/* 월별 테이블 */
+table.monthly-tbl{border-collapse:collapse;width:100%;font-size:12px;}
+table.monthly-tbl th{background:#1e3a8a;color:#fff;padding:7px 4px;text-align:center;border:1px solid #1e40af;}
+table.monthly-tbl td{border:1px solid #e2e8f0;padding:5px 4px;text-align:center;}
+table.monthly-tbl tr.weekend{background:#fef2f2;}
+table.monthly-tbl tr.holiday{background:#fff7ed;}
+
+/* 입력 필드 */
+input[type=text],input[type=date],select,textarea{
+  border:1.5px solid #d1d5db;border-radius:8px;padding:8px 12px;
+  width:100%;font-size:14px;transition:border-color .15s;outline:none;background:#fff;
+}
+input[type=text]:focus,input[type=date]:focus,select:focus,textarea:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+label.form-label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;}
+.btn-primary{background:#2563eb;color:#fff;}
+.btn-primary:hover{background:#1d4ed8;box-shadow:0 4px 12px rgba(37,99,235,.3);}
+.btn-success{background:#16a34a;color:#fff;}
+.btn-success:hover{background:#15803d;}
+.btn-gray{background:#f3f4f6;color:#374151;}
+.btn-gray:hover{background:#e5e7eb;}
+.btn-danger{background:#fee2e2;color:#b91c1c;}
+.btn-danger:hover{background:#fecaca;}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:7px;}
+
+/* 알림 */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;}
+.toast-item{display:flex;align-items:center;gap:10px;padding:14px 20px;border-radius:12px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.15);margin-top:8px;animation:slideIn .2s ease;}
+@keyframes slideIn{from{transform:translateX(60px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.clock-display{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:2px;color:#1e40af;}
+
+/* 사이드바 레이아웃 */
+.app-layout{display:flex;min-height:100vh;}
+.sidebar{width:220px;background:linear-gradient(180deg,#1e3a8a 0%,#1e40af 60%,#2563eb 100%);flex-shrink:0;display:flex;flex-direction:column;}
+.main-content{flex:1;overflow:auto;background:#f1f5f9;}
+@media(max-width:768px){
+  .sidebar{width:60px;}
+  .sidebar .nav-text{display:none;}
+  .sidebar .site-name{display:none;}
+  .main-content{margin-left:0;}
+}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:rgba(255,255,255,.75);cursor:pointer;transition:all .2s;border-radius:0;border-left:3px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,.18);color:#fff;border-left-color:#93c5fd;font-weight:700;}
+.nav-item i{width:20px;text-align:center;font-size:15px;}
+</style>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body style="margin:0;background:#f1f5f9;">
 
-<!-- 헤더 -->
-<header class="bg-blue-900 text-white shadow-lg no-print">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <div>
-      <h1 class="text-lg font-bold">산청인애노인통합지원센터</h1>
-      <p class="text-blue-200 text-sm">2026년 근무상황부</p>
-    </div>
-    <div id="liveClock" class="clock text-blue-100"></div>
+<div class="app-layout">
+
+<!-- ══════ 사이드바 ══════ -->
+<aside class="sidebar no-print">
+  <div style="padding:24px 20px 16px;">
+    <div class="site-name" style="color:#bfdbfe;font-size:11px;font-weight:600;letter-spacing:.5px;margin-bottom:4px;">산청인애노인통합지원센터</div>
+    <div style="color:#fff;font-size:13px;font-weight:700;">2026 근무상황부</div>
   </div>
-</header>
-
-<!-- 탭 네비게이션 -->
-<nav class="bg-white border-b shadow-sm no-print">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="flex space-x-1 py-2 overflow-x-auto">
-      <button onclick="showTab('dashboard')" id="tab-dashboard" class="tab-btn tab-active px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition">
-        <i class="fas fa-tachometer-alt mr-1"></i>대시보드
-      </button>
-      <button onclick="showTab('monthly')" id="tab-monthly" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-calendar-alt mr-1"></i>월별 근무현황
-      </button>
-      <button onclick="showTab('leave')" id="tab-leave" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-file-alt mr-1"></i>연차 신청서
-      </button>
-      <button onclick="showTab('print')" id="tab-print" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-print mr-1"></i>개인별 출력
-      </button>
-      <button onclick="showTab('stats')" id="tab-stats" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-chart-bar mr-1"></i>통계
-      </button>
-      <button onclick="showTab('employees')" id="tab-employees" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition bg-gray-100 hover:bg-gray-200">
-        <i class="fas fa-users-cog mr-1"></i>직원 관리
-      </button>
+  <div style="margin:0 12px;height:1px;background:rgba(255,255,255,.15);margin-bottom:8px;"></div>
+  <nav style="flex:1;padding:8px 0;">
+    <div class="nav-item active" onclick="showTab('dashboard')" id="nav-dashboard">
+      <i class="fas fa-th-large"></i><span class="nav-text">대시보드</span>
     </div>
+    <div class="nav-item" onclick="showTab('monthly')" id="nav-monthly">
+      <i class="fas fa-calendar-alt"></i><span class="nav-text">월별 근무현황</span>
+    </div>
+    <div class="nav-item" onclick="showTab('leave')" id="nav-leave">
+      <i class="fas fa-file-signature"></i><span class="nav-text">연차 신청서</span>
+    </div>
+    <div class="nav-item" onclick="showTab('print')" id="nav-print">
+      <i class="fas fa-print"></i><span class="nav-text">개인별 출력</span>
+    </div>
+    <div class="nav-item" onclick="showTab('stats')" id="nav-stats">
+      <i class="fas fa-chart-bar"></i><span class="nav-text">통계</span>
+    </div>
+    <div class="nav-item" onclick="showTab('employees')" id="nav-employees">
+      <i class="fas fa-users-cog"></i><span class="nav-text">직원 관리</span>
+    </div>
+  </nav>
+  <div style="padding:16px 20px;border-top:1px solid rgba(255,255,255,.1);">
+    <div id="sidebarClock" style="color:#bfdbfe;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:2px;"></div>
+    <div id="sidebarDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:2px;"></div>
   </div>
-</nav>
+</aside>
 
-<main class="max-w-7xl mx-auto px-4 py-6">
+<!-- ══════ 메인 콘텐츠 ══════ -->
+<div class="main-content">
 
-<!-- ════════════════ 대시보드 탭 ════════════════ -->
-<div id="page-dashboard">
-  <!-- 날짜 표시 -->
-  <div class="mb-4 text-center">
-    <span id="today-date-label" class="text-base text-gray-600 font-medium"></span>
-  </div>
-
-  <!-- 직원 카드 그리드 -->
-  <div id="emp-cards" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6"></div>
-
-  <!-- 출퇴근 등록 패널 (카드 클릭 시 표시) -->
-  <div id="reg-panel" style="display:none" class="bg-white rounded-2xl shadow-lg p-5 border-2 border-blue-300">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-lg font-bold text-blue-900">
-        <i class="fas fa-clock mr-2 text-blue-500"></i>출퇴근 등록 —
-        <span id="reg-emp-name" class="text-blue-600"></span>
-      </h2>
-      <button onclick="closeRegPanel()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1">날짜</label>
-        <input type="date" id="reg-date" class="text-sm">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-600 mb-1">시간 (HH:MM)</label>
-        <input type="text" id="reg-time" placeholder="08:35" maxlength="5" class="text-sm">
-      </div>
-    </div>
-    <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-600 mb-2">상태 선택</label>
-      <div class="grid grid-cols-4 gap-2">
-        <button onclick="setStatus('출근')" class="status-btn status-출근 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-green-400 transition">출근</button>
-        <button onclick="setStatus('퇴근')" class="status-btn status-퇴근 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-blue-400 transition">퇴근</button>
-        <button onclick="setStatus('오전반차')" class="status-btn status-오전반차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-purple-400 transition">오전반차</button>
-        <button onclick="setStatus('오후반차')" class="status-btn status-오후반차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-pink-400 transition">오후반차</button>
-        <button onclick="setStatus('연차')" class="status-btn status-연차 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-yellow-400 transition">연차</button>
-        <button onclick="setStatus('병가')" class="status-btn status-병가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-red-400 transition">병가</button>
-        <button onclick="setStatus('경조휴가')" class="status-btn status-경조휴가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-orange-400 transition">경조휴가</button>
-        <button onclick="setStatus('공가')" class="status-btn status-공가 py-2 px-3 rounded-lg text-sm font-medium border-2 border-transparent hover:border-sky-400 transition">공가</button>
-      </div>
-      <input type="hidden" id="reg-status" value="">
-      <input type="hidden" id="reg-employee" value="">
-    </div>
-    <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-600 mb-1">메모 (선택)</label>
-      <input type="text" id="reg-note" placeholder="비고 입력" class="text-sm">
-    </div>
-    <div id="reg-status-display" class="mb-3 text-center text-sm font-semibold text-gray-500 h-6"></div>
-    <button onclick="submitAttendance()" class="w-full bg-blue-700 hover:bg-blue-800 text-white py-3 rounded-xl font-bold text-base transition">
-      <i class="fas fa-check-circle mr-2"></i>등록하기
-    </button>
+<!-- 상단 헤더 -->
+<div class="no-print" style="background:#fff;border-bottom:1px solid #e5e7eb;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;">
+  <div style="font-size:18px;font-weight:800;color:#1e3a8a;" id="pageTitle">대시보드</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="todayBadge" style="background:#eff6ff;color:#1d4ed8;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:600;"></span>
   </div>
 </div>
 
-<!-- ════════════════ 월별 근무현황 탭 ════════════════ -->
-<div id="page-monthly" class="hidden">
-  <div class="bg-white rounded-2xl shadow-md p-5">
-    <div class="flex flex-wrap items-center gap-3 mb-5 no-print">
-      <h2 class="text-lg font-bold text-blue-900 flex-1">
-        <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>월별 근무현황
-      </h2>
-      <select id="monthly-year" class="text-sm w-28">
+<div style="padding:24px 28px;">
+
+<!-- ══════════════════════════════════════════════
+     대시보드 탭
+══════════════════════════════════════════════ -->
+<div id="page-dashboard">
+
+  <!-- KPI 카드 행 -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" class="kpi-grid">
+    <div class="stat-card" style="background:linear-gradient(135deg,#1e40af,#2563eb);">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">오늘 출근</div>
+      <div id="kpi-checkin" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">명 출근 완료</div>
+      <i class="fas fa-user-check" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#065f46,#059669);">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">이번달 연차</div>
+      <div id="kpi-annual" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">일 사용</div>
+      <i class="fas fa-umbrella-beach" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">이번달 반차</div>
+      <div id="kpi-half" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">회 사용</div>
+      <i class="fas fa-clock" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
+    </div>
+    <div class="stat-card" style="background:linear-gradient(135deg,#581c87,#9333ea);">
+      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">이번달 병가</div>
+      <div id="kpi-sick" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
+      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">일</div>
+      <i class="fas fa-notes-medical" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
+    </div>
+  </div>
+
+  <!-- 직원 카드 그리드 + 등록 패널 -->
+  <div class="card" style="padding:24px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div>
+        <div style="font-size:16px;font-weight:800;color:#1e3a8a;">직원 출퇴근 현황</div>
+        <div style="font-size:13px;color:#6b7280;margin-top:2px;">카드를 클릭하면 출퇴근 등록 패널이 열립니다</div>
+      </div>
+      <button onclick="loadCardStatuses()" class="btn btn-gray btn-sm"><i class="fas fa-sync-alt"></i> 새로고침</button>
+    </div>
+    <div id="emp-cards" style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:0;"></div>
+
+    <!-- 등록 패널 -->
+    <div id="reg-panel" style="display:none;margin-top:20px;">
+      <div class="reg-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-size:15px;font-weight:800;color:#1e3a8a;">
+            <i class="fas fa-pencil-alt" style="color:#2563eb;margin-right:8px;"></i>
+            <span id="reg-emp-name" style="color:#2563eb;"></span> 출퇴근 등록
+          </div>
+          <button onclick="closeRegPanel()" style="background:#f1f5f9;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;color:#6b7280;font-size:13px;">✕ 닫기</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div>
+            <label class="form-label">날짜</label>
+            <input type="date" id="reg-date">
+          </div>
+          <div>
+            <label class="form-label">시간 <span style="font-size:11px;color:#9ca3af;">(HH:MM)</span></label>
+            <input type="text" id="reg-time" placeholder="08:35" maxlength="5">
+          </div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label class="form-label">근무 상태 선택</label>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            <div class="status-pill badge-출근" onclick="setStatus('출근',this)">✅ 출근</div>
+            <div class="status-pill badge-퇴근" onclick="setStatus('퇴근',this)">🔵 퇴근</div>
+            <div class="status-pill badge-오전반차" onclick="setStatus('오전반차',this)">🟣 오전반차</div>
+            <div class="status-pill badge-오후반차" onclick="setStatus('오후반차',this)">🩷 오후반차</div>
+            <div class="status-pill badge-연차" onclick="setStatus('연차',this)">🟡 연차</div>
+            <div class="status-pill badge-병가" onclick="setStatus('병가',this)">🔴 병가</div>
+            <div class="status-pill badge-경조휴가" onclick="setStatus('경조휴가',this)">🟠 경조휴가</div>
+            <div class="status-pill badge-공가" onclick="setStatus('공가',this)">🔷 공가</div>
+          </div>
+          <input type="hidden" id="reg-status">
+          <input type="hidden" id="reg-employee">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label class="form-label">메모 <span style="font-size:11px;color:#9ca3af;">(선택)</span></label>
+          <input type="text" id="reg-note" placeholder="비고 입력">
+        </div>
+        <div id="reg-status-display" style="height:28px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;"></div>
+        <button onclick="submitAttendance()" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px;">
+          <i class="fas fa-check-circle"></i> 등록하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이번달 직원별 현황 테이블 -->
+  <div class="card" style="padding:24px;">
+    <div style="font-size:15px;font-weight:800;color:#1e3a8a;margin-bottom:16px;"><i class="fas fa-table" style="color:#2563eb;margin-right:8px;"></i>이번달 근무 현황 요약</div>
+    <div id="month-summary-table" style="overflow-x:auto;"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     월별 근무현황 탭
+══════════════════════════════════════════════ -->
+<div id="page-monthly" style="display:none;">
+  <div class="card" style="padding:24px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:20px;" class="no-print">
+      <select id="monthly-year" style="width:120px;">
         <option value="2026" selected>2026년</option>
         <option value="2025">2025년</option>
       </select>
-      <select id="monthly-month" class="text-sm w-24">
-        ${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${i+2===new Date().getMonth()+1?'selected':''}>${i+1}월</option>`).join('')}
+      <select id="monthly-month" style="width:100px;">
+        ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
       </select>
-      <button onclick="loadMonthly()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">조회</button>
-      <button onclick="window.print()" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 no-print">
-        <i class="fas fa-print mr-1"></i>인쇄
-      </button>
+      <button onclick="loadMonthly()" class="btn btn-primary"><i class="fas fa-search"></i> 조회</button>
+      <button onclick="window.print()" class="btn btn-gray no-print"><i class="fas fa-print"></i> 인쇄</button>
     </div>
-    <div id="monthly-table" class="overflow-x-auto"></div>
+    <div id="monthly-table" style="overflow-x:auto;"></div>
   </div>
 </div>
 
-<!-- ════════════════ 연차 신청서 탭 ════════════════ -->
-<div id="page-leave" class="hidden">
-  <div class="space-y-6">
-    <!-- 신청서 작성 -->
-    <div class="bg-white rounded-2xl shadow-md p-5 no-print">
-      <h2 class="text-lg font-bold text-blue-900 mb-4">
-        <i class="fas fa-file-signature mr-2 text-blue-500"></i>연차 사용 신청서 작성
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">신청자</label>
-          <select id="lr-employee" class="text-sm"></select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">휴가 구분</label>
-          <select id="lr-type" class="text-sm">
-            <option value="연차">연차</option>
-            <option value="오전반차">오전반차</option>
-            <option value="오후반차">오후반차</option>
-            <option value="경조휴가">경조휴가</option>
-            <option value="병가">병가</option>
-            <option value="공가">공가</option>
-            <option value="기타">기타</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">휴가 시작일</label>
-          <input type="date" id="lr-start" class="text-sm">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-600 mb-1">휴가 종료일</label>
-          <input type="date" id="lr-end" class="text-sm">
+
+<!-- ══════════════════════════════════════════════
+     연차 신청서 탭
+══════════════════════════════════════════════ -->
+<div id="page-leave" style="display:none;">
+  <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;">
+
+    <!-- 신청서 작성 영역 -->
+    <div class="card" style="padding:28px;" id="leave-form-area">
+      <!-- 공문서 양식 헤더 -->
+      <div style="text-align:center;margin-bottom:20px;border-bottom:3px double #1e3a8a;padding-bottom:16px;">
+        <div style="font-size:13px;color:#6b7280;margin-bottom:4px;">산청인애노인통합지원센터</div>
+        <div style="font-size:24px;font-weight:900;color:#1e3a8a;letter-spacing:8px;">연차사용신청서</div>
+      </div>
+
+      <!-- 결재란 (우상단) -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;" class="no-print">
+        <div style="border:2px solid #1e3a8a;display:grid;grid-template-columns:repeat(3,80px);">
+          <div style="background:#dbeafe;text-align:center;padding:5px 0;font-size:11px;font-weight:700;color:#1e3a8a;border-right:1px solid #1e3a8a;">담&nbsp;&nbsp;&nbsp;당</div>
+          <div style="background:#dbeafe;text-align:center;padding:5px 0;font-size:11px;font-weight:700;color:#1e3a8a;border-right:1px solid #1e3a8a;">전문사회복지사</div>
+          <div style="background:#dbeafe;text-align:center;padding:5px 0;font-size:11px;font-weight:700;color:#1e3a8a;">센&nbsp;터&nbsp;장</div>
+          <div style="border-top:1px solid #1e3a8a;border-right:1px solid #1e3a8a;height:56px;padding:4px;font-size:11px;color:#374151;">
+            <div id="sign-applicant-view" contenteditable="true" style="height:100%;outline:none;font-size:11px;"></div>
+          </div>
+          <div style="border-top:1px solid #1e3a8a;border-right:1px solid #1e3a8a;height:56px;padding:4px;font-size:11px;color:#374151;">
+            <div id="sign-social-view" contenteditable="true" style="height:100%;outline:none;font-size:11px;"></div>
+          </div>
+          <div style="border-top:1px solid #1e3a8a;height:56px;padding:4px;font-size:11px;color:#374151;">
+            <div id="sign-director-view" contenteditable="true" style="height:100%;outline:none;font-size:11px;"></div>
+          </div>
+          <div style="border-top:1px solid #93c5fd;border-right:1px solid #1e3a8a;padding:3px;text-align:center;">
+            <input id="date-applicant-view" type="text" placeholder="서명일" style="font-size:9px;padding:1px;text-align:center;border:none;background:transparent;width:100%;outline:none;">
+          </div>
+          <div style="border-top:1px solid #93c5fd;border-right:1px solid #1e3a8a;padding:3px;text-align:center;">
+            <input id="date-social-view" type="text" placeholder="서명일" style="font-size:9px;padding:1px;text-align:center;border:none;background:transparent;width:100%;outline:none;">
+          </div>
+          <div style="border-top:1px solid #93c5fd;padding:3px;text-align:center;">
+            <input id="date-director-view" type="text" placeholder="서명일" style="font-size:9px;padding:1px;text-align:center;border:none;background:transparent;width:100%;outline:none;">
+          </div>
         </div>
       </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-600 mb-1">사유</label>
-        <textarea id="lr-reason" rows="2" class="text-sm w-full border rounded-lg p-2" placeholder="휴가 사유를 입력하세요"></textarea>
+
+      <!-- 신청서 본문 테이블 -->
+      <table class="form-table">
+        <tr>
+          <th>소&nbsp;&nbsp;&nbsp;&nbsp;속</th>
+          <td colspan="3">산청인애노인통합지원센터</td>
+        </tr>
+        <tr>
+          <th>신&nbsp;청&nbsp;자</th>
+          <td style="width:160px;">
+            <select id="lr-employee" style="border:none;background:transparent;font-weight:700;font-size:14px;color:#1e3a8a;padding:0;cursor:pointer;width:100%;"></select>
+          </td>
+          <th style="width:130px;">직&nbsp;&nbsp;&nbsp;&nbsp;책</th>
+          <td id="lr-position" style="color:#374151;font-weight:500;">-</td>
+        </tr>
+        <tr>
+          <th>휴가구분</th>
+          <td colspan="3">
+            <select id="lr-type" style="border:none;background:transparent;font-weight:700;font-size:14px;color:#1e3a8a;padding:0;cursor:pointer;width:auto;">
+              <option value="연차">연차</option>
+              <option value="오전반차">오전반차</option>
+              <option value="오후반차">오후반차</option>
+              <option value="경조휴가">경조휴가</option>
+              <option value="병가">병가</option>
+              <option value="공가">공가</option>
+              <option value="기타">기타</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>휴가기간</th>
+          <td>
+            <input type="date" id="lr-start" style="border:none;background:transparent;padding:0;font-size:14px;width:auto;">
+          </td>
+          <th>종&nbsp;료&nbsp;일</th>
+          <td>
+            <input type="date" id="lr-end" style="border:none;background:transparent;padding:0;font-size:14px;width:auto;">
+          </td>
+        </tr>
+        <tr>
+          <th>총&nbsp;일&nbsp;수</th>
+          <td colspan="3" id="lr-days-display" style="font-weight:700;color:#dc2626;">-</td>
+        </tr>
+        <tr>
+          <th>사&nbsp;&nbsp;&nbsp;&nbsp;유</th>
+          <td colspan="3">
+            <div id="lr-reason" contenteditable="true" style="min-height:36px;outline:none;padding:2px;color:#111827;" placeholder="사유를 입력하세요"></div>
+          </td>
+        </tr>
+        <tr>
+          <th>업무인수인계</th>
+          <td colspan="3">
+            <div id="lr-handover" contenteditable="true" style="min-height:60px;outline:none;padding:2px;color:#111827;"></div>
+          </td>
+        </tr>
+      </table>
+
+      <div style="text-align:center;margin:16px 0;font-size:13px;color:#374151;line-height:1.8;">
+        위와 같이 휴가 사용을 신청합니다.<br>
+        <span id="lr-submit-date" style="font-weight:700;"></span>
       </div>
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-600 mb-1">주요 업무 인수인계 사항</label>
-        <textarea id="lr-handover" rows="3" class="text-sm w-full border rounded-lg p-2" placeholder="업무 인수인계 내용을 입력하세요"></textarea>
+
+      <div style="text-align:right;font-size:13px;color:#374151;margin-bottom:20px;">
+        산청인애노인통합지원센터장 귀중
       </div>
-      <button onclick="submitLeaveRequest()" class="bg-blue-700 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800 font-medium">
-        <i class="fas fa-save mr-1"></i>신청서 저장
-      </button>
+
+      <div style="display:flex;gap:10px;justify-content:center;" class="no-print">
+        <button onclick="submitLeaveRequest()" class="btn btn-primary"><i class="fas fa-save"></i> 저장</button>
+        <button onclick="printLeaveForm()" class="btn btn-gray"><i class="fas fa-print"></i> 인쇄</button>
+        <button onclick="resetLeaveForm()" class="btn btn-gray"><i class="fas fa-redo"></i> 초기화</button>
+      </div>
     </div>
 
     <!-- 신청서 목록 -->
-    <div class="bg-white rounded-2xl shadow-md p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-blue-900">
-          <i class="fas fa-list mr-2 text-blue-500"></i>신청서 목록
-        </h2>
-        <button onclick="loadLeaveRequests()" class="bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm hover:bg-gray-200">
-          <i class="fas fa-sync-alt mr-1"></i>새로고침
-        </button>
+    <div class="card" style="padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div style="font-size:14px;font-weight:800;color:#1e3a8a;"><i class="fas fa-list" style="margin-right:6px;"></i>신청서 목록</div>
+        <button onclick="loadLeaveRequests()" class="btn btn-gray btn-sm"><i class="fas fa-sync-alt"></i></button>
       </div>
-      <div id="leave-list"></div>
+      <div id="leave-list" style="max-height:calc(100vh - 280px);overflow-y:auto;"></div>
     </div>
   </div>
 </div>
 
-<!-- ════════════════ 개인별 출력 탭 ════════════════ -->
-<div id="page-print" class="hidden">
-  <div class="bg-white rounded-2xl shadow-md p-5">
-    <div class="flex flex-wrap items-center gap-3 mb-5 no-print">
-      <h2 class="text-lg font-bold text-blue-900 flex-1">
-        <i class="fas fa-print mr-2 text-blue-500"></i>개인별 출력
-      </h2>
-      <select id="print-employee" class="text-sm w-32">
-        <option value="">직원 선택</option>
-      </select>
-      <select id="print-year" class="text-sm w-28">
-        <option value="2026" selected>2026년</option>
-      </select>
-      <select id="print-month" class="text-sm w-24">
+
+<!-- ══════════════════════════════════════════════
+     개인별 출력 탭
+══════════════════════════════════════════════ -->
+<div id="page-print" style="display:none;">
+  <div class="card" style="padding:24px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:20px;" class="no-print">
+      <select id="print-employee" style="width:130px;"><option value="">직원 선택</option></select>
+      <select id="print-year" style="width:110px;"><option value="2026" selected>2026년</option></select>
+      <select id="print-month" style="width:100px;">
         ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
       </select>
-      <button onclick="loadPrint()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">미리보기</button>
-      <button onclick="window.print()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 no-print">
-        <i class="fas fa-print mr-1"></i>인쇄
-      </button>
+      <button onclick="loadPrint()" class="btn btn-primary"><i class="fas fa-eye"></i> 미리보기</button>
+      <button onclick="window.print()" class="btn btn-success no-print"><i class="fas fa-print"></i> 인쇄</button>
     </div>
     <div id="print-area"></div>
   </div>
 </div>
 
-<!-- ════════════════ 통계 탭 ════════════════ -->
-<div id="page-stats" class="hidden">
-  <div class="bg-white rounded-2xl shadow-md p-5">
-    <div class="flex flex-wrap items-center gap-3 mb-5">
-      <h2 class="text-lg font-bold text-blue-900 flex-1">
-        <i class="fas fa-chart-bar mr-2 text-blue-500"></i>근무 통계
-      </h2>
-      <select id="stats-year" class="text-sm w-28">
-        <option value="2026" selected>2026년</option>
-        <option value="2025">2025년</option>
-      </select>
-      <select id="stats-month" class="text-sm w-24">
+
+<!-- ══════════════════════════════════════════════
+     통계 탭
+══════════════════════════════════════════════ -->
+<div id="page-stats" style="display:none;">
+  <!-- 탭 내부 (월별/연간) -->
+  <div class="card" style="padding:24px;margin-bottom:20px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:20px;">
+      <select id="stats-year" style="width:110px;"><option value="2026" selected>2026년</option><option value="2025">2025년</option></select>
+      <select id="stats-month" style="width:110px;">
         <option value="">연간 통계</option>
         ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
       </select>
-      <button onclick="loadStats()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">조회</button>
+      <button onclick="loadStats()" class="btn btn-primary"><i class="fas fa-chart-bar"></i> 조회</button>
     </div>
     <div id="stats-table"></div>
   </div>
+
+  <!-- 연간 연차 현황 (개인별 발생/사용/잔여) -->
+  <div class="card" style="padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-size:15px;font-weight:800;color:#1e3a8a;"><i class="fas fa-calendar-check" style="color:#2563eb;margin-right:8px;"></i>개인별 연간 연차 현황</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <select id="annual-year" style="width:110px;"><option value="2026" selected>2026년</option><option value="2025">2025년</option></select>
+        <button onclick="loadAnnualLeave()" class="btn btn-primary btn-sm"><i class="fas fa-sync-alt"></i> 조회</button>
+      </div>
+    </div>
+    <div id="annual-leave-table"></div>
+    <div style="margin-top:14px;padding:12px 16px;background:#fffbeb;border-radius:10px;border-left:4px solid #f59e0b;">
+      <div style="font-size:12px;color:#92400e;font-weight:600;margin-bottom:6px;"><i class="fas fa-info-circle"></i> 연차 발생 기준 안내</div>
+      <div style="font-size:12px;color:#78350f;line-height:1.7;">
+        · 1년 미만 근로자: 매월 1일 발생 (최대 11일)<br>
+        · 1년 이상 3년 미만: 15일 발생<br>
+        · 3년 이상: 2년마다 1일 추가 (최대 25일)<br>
+        · 반차 2회 = 연차 1일로 환산
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- ════════════════ 직원 관리 탭 ════════════════ -->
-<div id="page-employees" class="hidden">
-  <div class="bg-white rounded-2xl shadow-md p-5">
-    <h2 class="text-lg font-bold text-blue-900 mb-4">
-      <i class="fas fa-users-cog mr-2 text-blue-500"></i>직원 관리
-    </h2>
-    <div class="flex gap-3 mb-5">
-      <input type="text" id="new-employee-name" placeholder="직원 이름" class="text-sm flex-1">
-      <input type="text" id="new-employee-pos" placeholder="직책 (예: 사회복지사)" class="text-sm flex-1">
-      <button onclick="addEmployee()" class="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800 whitespace-nowrap">
-        <i class="fas fa-plus mr-1"></i>직원 추가
-      </button>
+
+<!-- ══════════════════════════════════════════════
+     직원 관리 탭
+══════════════════════════════════════════════ -->
+<div id="page-employees" style="display:none;">
+  <div class="card" style="padding:24px;">
+    <div style="font-size:15px;font-weight:800;color:#1e3a8a;margin-bottom:20px;"><i class="fas fa-users-cog" style="color:#2563eb;margin-right:8px;"></i>직원 관리</div>
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+      <input type="text" id="new-employee-name" placeholder="직원 이름" style="flex:1;min-width:140px;">
+      <input type="text" id="new-employee-pos" placeholder="직책 (예: 사회복지사)" style="flex:1;min-width:160px;">
+      <button onclick="addEmployee()" class="btn btn-primary"><i class="fas fa-plus"></i> 직원 추가</button>
     </div>
     <div id="employee-list"></div>
   </div>
 </div>
 
-</main>
-
-<!-- 연차 신청서 출력 모달 -->
-<div id="leave-modal" class="fixed inset-0 modal-bg z-50 hidden flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-screen overflow-y-auto">
-    <div class="p-6" id="leave-print-content"></div>
-    <div class="flex gap-3 p-4 border-t no-print">
-      <button onclick="window.print()" class="flex-1 bg-blue-700 text-white py-2 rounded-lg font-medium hover:bg-blue-800">
-        <i class="fas fa-print mr-1"></i>인쇄
-      </button>
-      <button onclick="closeLeaveModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-300">닫기</button>
-    </div>
-  </div>
-</div>
+</div><!-- /padding -->
+</div><!-- /main-content -->
+</div><!-- /app-layout -->
 
 <!-- 알림 토스트 -->
-<div id="toast" class="fixed bottom-6 right-6 z-50 hidden"></div>
+<div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 전역 상태
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 let employees = []
 let selectedStatus = ''
-let currentLeaveId = null
-
-// 한국어 요일
 const DAYS = ['일','월','화','수','목','금','토']
-const STATUS_COLORS = {
-  '출근':'status-출근','퇴근':'status-퇴근','연차':'status-연차',
-  '오전반차':'status-오전반차','오후반차':'status-오후반차',
-  '병가':'status-병가','경조휴가':'status-경조휴가','공가':'status-공가','휴무':'status-휴무'
-}
+const AVATARCOLORS = [
+  ['#dbeafe','#1d4ed8'],['#dcfce7','#15803d'],['#fce7f3','#9d174d'],
+  ['#fef3c7','#b45309'],['#e0f2fe','#0369a1']
+]
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 초기화
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
   startClock()
   setDefaultDate()
+  setLrSubmitDate()
   await loadEmployees()
+  loadKPI()
+  loadMonthSummaryTable()
 })
 
 function startClock() {
@@ -597,9 +779,10 @@ function startClock() {
     const h = String(now.getHours()).padStart(2,'0')
     const m = String(now.getMinutes()).padStart(2,'0')
     const s = String(now.getSeconds()).padStart(2,'0')
-    document.getElementById('liveClock').textContent = h+':'+m+':'+s
+    const el = document.getElementById('sidebarClock')
+    if(el) el.textContent = h+':'+m+':'+s
   }
-  tick(); setInterval(tick, 1000)
+  tick(); setInterval(tick,1000)
 }
 
 function setDefaultDate() {
@@ -608,148 +791,247 @@ function setDefaultDate() {
   const el = document.getElementById('reg-date')
   if(el) el.value = str
 
-  // 오늘 날짜 라벨
-  const label = document.getElementById('today-date-label')
-  if(label) {
-    const d = today
-    label.textContent = d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 ('+DAYS[d.getDay()]+')'
-  }
+  // 상단 날짜 배지
+  const badge = document.getElementById('todayBadge')
+  const sideDate = document.getElementById('sidebarDate')
+  const formatted = today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일 ('+DAYS[today.getDay()]+')'
+  if(badge) badge.textContent = formatted
+  if(sideDate) sideDate.textContent = (today.getMonth()+1)+'월 '+today.getDate()+'일 '+DAYS[today.getDay()]+'요일'
 }
 
-// ═══════════════════════════════════════════════════
-// 직원 카드 (대시보드)
-// ═══════════════════════════════════════════════════
+function setLrSubmitDate() {
+  const today = new Date()
+  const el = document.getElementById('lr-submit-date')
+  if(el) el.textContent = today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일'
+  const s = document.getElementById('lr-start')
+  const e = document.getElementById('lr-end')
+  if(s) s.value = today.toISOString().slice(0,10)
+  if(e) e.value = today.toISOString().slice(0,10)
+  // 날짜 변경 시 일수 업데이트
+  if(s) s.onchange = calcLrDays
+  if(e) e.onchange = calcLrDays
+}
+
+function calcLrDays() {
+  const s = document.getElementById('lr-start')?.value
+  const e = document.getElementById('lr-end')?.value
+  const el = document.getElementById('lr-days-display')
+  if(!s||!e||!el) return
+  const diff = Math.floor((new Date(e)-new Date(s))/(86400000))+1
+  el.textContent = diff > 0 ? diff+'일' : '-'
+}
+
+// ══════════════════════════════════════════════
+// 사이드바 탭 전환
+// ══════════════════════════════════════════════
+const PAGE_TITLES = {
+  dashboard:'대시보드', monthly:'월별 근무현황', leave:'연차 신청서',
+  print:'개인별 출력', stats:'통계', employees:'직원 관리'
+}
+function showTab(name) {
+  ['dashboard','monthly','leave','print','stats','employees'].forEach(t => {
+    const pg = document.getElementById('page-'+t)
+    if(pg) pg.style.display = t===name?'':'none'
+    const nv = document.getElementById('nav-'+t)
+    if(nv) nv.classList.toggle('active', t===name)
+  })
+  const pt = document.getElementById('pageTitle')
+  if(pt) pt.textContent = PAGE_TITLES[name]||''
+  if(name==='monthly') loadMonthly()
+  if(name==='stats') { loadStats(); loadAnnualLeave() }
+  if(name==='leave') loadLeaveRequests()
+}
+
+// ══════════════════════════════════════════════
+// KPI 카드
+// ══════════════════════════════════════════════
+async function loadKPI() {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()+1
+
+  // 오늘 출근 수
+  try {
+    const r = await fetch('/api/attendance/today')
+    const d = await r.json()
+    const cnt = (d.data||[]).filter(x=>x.status==='출근').length
+    const el = document.getElementById('kpi-checkin')
+    if(el) el.textContent = cnt
+  } catch(e){}
+
+  // 이번달 통계
+  try {
+    const r = await fetch('/api/stats/monthly?year='+year+'&month='+month)
+    const d = await r.json()
+    let annual=0, half=0, sick=0
+    ;(d.data||[]).forEach(x=>{
+      annual += (x.annual_leave||0)
+      half += (x.am_half||0)+(x.pm_half||0)
+      sick += (x.sick_leave||0)
+    })
+    const ea = document.getElementById('kpi-annual')
+    const eh = document.getElementById('kpi-half')
+    const es = document.getElementById('kpi-sick')
+    if(ea) ea.textContent = annual
+    if(eh) eh.textContent = half
+    if(es) es.textContent = sick
+  } catch(e){}
+}
+
+// ══════════════════════════════════════════════
+// 이번달 요약 테이블
+// ══════════════════════════════════════════════
+async function loadMonthSummaryTable() {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = today.getMonth()+1
+  const r = await fetch('/api/stats/monthly?year='+year+'&month='+month)
+  const d = await r.json()
+  const container = document.getElementById('month-summary-table')
+  if(!d.data||!container) return
+
+  let html = \`<table class="stats-tbl"><thead><tr>
+    <th>성명</th><th>출근일수</th><th>연차</th><th>오전반차</th><th>오후반차</th><th>병가</th><th>경조휴가</th><th>공가</th>
+  </tr></thead><tbody>\`
+  d.data.forEach(row => {
+    html += \`<tr>
+      <td class="name-cell">\${row.name}</td>
+      <td><span style="font-weight:700;color:#15803d;">\${row.work_count||0}</span></td>
+      <td><span style="color:#b45309;">\${row.annual_leave||0}일</span></td>
+      <td>\${row.am_half||0}</td><td>\${row.pm_half||0}</td>
+      <td style="color:#dc2626;">\${row.sick_leave||0}</td>
+      <td>\${row.family_leave||0}</td><td>\${row.official_leave||0}</td>
+    </tr>\`
+  })
+  html += '</tbody></table>'
+  container.innerHTML = html
+}
+
+// ══════════════════════════════════════════════
+// 직원 로드 & 카드 렌더링
+// ══════════════════════════════════════════════
+async function loadEmployees() {
+  const r = await fetch('/api/employees')
+  const d = await r.json()
+  employees = d.data || []
+
+  // 셀렉트 채우기
+  ;['print-employee','lr-employee'].forEach(id => {
+    const el = document.getElementById(id)
+    if(!el) return
+    const prev = el.value
+    el.innerHTML = '<option value="">-- 선택 --</option>'
+    employees.forEach(e => { el.innerHTML += \`<option value="\${e.id}">\${e.name}</option>\` })
+    if(prev) el.value = prev
+  })
+
+  // lr-employee 선택 시 직책 표시
+  const lrEmp = document.getElementById('lr-employee')
+  if(lrEmp) {
+    lrEmp.onchange = function() {
+      const emp = employees.find(e=>e.id==this.value)
+      const pos = document.getElementById('lr-position')
+      if(pos) pos.textContent = emp ? emp.position : '-'
+    }
+    if(employees.length>0) {
+      lrEmp.value = employees[0].id
+      lrEmp.dispatchEvent(new Event('change'))
+    }
+  }
+
+  renderEmpCards()
+  renderEmployeeList()
+}
+
 function renderEmpCards() {
   const container = document.getElementById('emp-cards')
   if(!container) return
-  container.innerHTML = employees.map(e => \`
-    <div onclick="openRegPanel(\${e.id},'\${e.name}')"
-      class="bg-white rounded-2xl shadow-md p-5 cursor-pointer hover:shadow-lg hover:border-blue-400 border-2 border-transparent transition-all select-none"
-      id="emp-card-\${e.id}">
-      <div class="flex flex-col items-center gap-2">
-        <div class="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-2xl font-bold text-blue-800">
-          \${e.name.charAt(0)}
-        </div>
-        <div class="font-bold text-gray-800 text-base">\${e.name}</div>
-        <div class="text-xs text-gray-400">\${e.position||''}</div>
-        <div id="emp-card-status-\${e.id}" class="mt-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-400">미등록</div>
-      </div>
-    </div>
-  \`).join('')
+  container.innerHTML = employees.map((e,i) => {
+    const [bg,fg] = AVATARCOLORS[i % AVATARCOLORS.length]
+    return \`<div class="emp-card" id="emp-card-\${e.id}" onclick="openRegPanel(\${e.id},'\${e.name}','\${e.position}')">
+      <div class="emp-avatar" style="background:\${bg};color:\${fg};">\${e.name.charAt(0)}</div>
+      <div style="font-size:14px;font-weight:700;color:#1f2937;margin-bottom:4px;">\${e.name}</div>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:8px;">\${e.position||''}</div>
+      <div id="emp-card-status-\${e.id}" class="badge badge-미등록" style="font-size:11px;">미등록</div>
+    </div>\`
+  }).join('')
   loadCardStatuses()
 }
 
 async function loadCardStatuses() {
-  const r = await fetch('/api/attendance/today')
-  const data = await r.json()
-  if(!data.data) return
-  data.data.forEach(a => {
-    const el = document.getElementById('emp-card-status-'+a.employee_id)
-    if(!el || !a.status) return
-    const sc = STATUS_COLORS[a.status] || 'bg-gray-100 text-gray-400'
-    el.className = 'mt-1 px-3 py-1 rounded-full text-xs font-semibold '+sc
-    el.textContent = a.status
-    const card = document.getElementById('emp-card-'+a.employee_id)
-    if(card && a.status==='출근') card.classList.add('border-green-300')
-  })
+  try {
+    const r = await fetch('/api/attendance/today')
+    const d = await r.json()
+    ;(d.data||[]).forEach(a => {
+      const el = document.getElementById('emp-card-status-'+a.employee_id)
+      if(!el) return
+      if(a.status) {
+        el.className = 'badge badge-'+a.status
+        el.textContent = a.status
+        const card = document.getElementById('emp-card-'+a.employee_id)
+        if(card && a.status==='출근') card.style.borderColor='#16a34a'
+      }
+    })
+  } catch(e) {}
 }
 
-function openRegPanel(id, name) {
+function openRegPanel(id, name, pos) {
+  // 선택된 카드 강조
+  document.querySelectorAll('.emp-card').forEach(c=>c.classList.remove('selected'))
+  const card = document.getElementById('emp-card-'+id)
+  if(card) card.classList.add('selected')
+
   document.getElementById('reg-employee').value = id
   document.getElementById('reg-emp-name').textContent = name
   document.getElementById('reg-status').value = ''
-  document.getElementById('reg-status-display').textContent = ''
-  document.getElementById('reg-status-display').className = 'mb-3 text-center text-sm font-semibold text-gray-500 h-6'
+  document.getElementById('reg-status-display').innerHTML = ''
   document.getElementById('reg-note').value = ''
-  document.getElementById('reg-time').disabled = false
-  document.querySelectorAll('.status-btn').forEach(btn => btn.style.outline='')
+  document.querySelectorAll('.status-pill').forEach(p=>p.classList.remove('selected'))
+
   const today = new Date().toISOString().slice(0,10)
   document.getElementById('reg-date').value = today
   const now = new Date()
   document.getElementById('reg-time').value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')
-  document.getElementById('reg-panel').style.display = ''
-  document.getElementById('reg-panel').scrollIntoView({behavior:'smooth', block:'nearest'})
+
+  const panel = document.getElementById('reg-panel')
+  panel.style.display = ''
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'})
 }
 
 function closeRegPanel() {
   document.getElementById('reg-panel').style.display = 'none'
   document.getElementById('reg-employee').value = ''
+  document.querySelectorAll('.emp-card').forEach(c=>c.classList.remove('selected'))
 }
 
-async function loadEmployees() {
-  const r = await fetch('/api/employees')
-  const data = await r.json()
-  employees = data.data || []
-
-  // 셀렉트 채우기 (print, leave 탭용)
-  const selects = ['print-employee','lr-employee']
-  selects.forEach(id => {
-    const el = document.getElementById(id)
-    if(!el) return
-    const prev = el.value
-    el.innerHTML = '<option value="">-- 선택 --</option>'
-    employees.forEach(e => {
-      el.innerHTML += '<option value="'+e.id+'">'+e.name+'</option>'
-    })
-    if(prev) el.value = prev
-  })
-  renderEmpCards()
-  renderEmployeeList()
-}
-
-// ═══════════════════════════════════════════════════
-// 탭 전환
-// ═══════════════════════════════════════════════════
-function showTab(name) {
-  document.querySelectorAll('[id^="page-"]').forEach(el => el.classList.add('hidden'))
-  document.getElementById('page-'+name).classList.remove('hidden')
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.remove('tab-active')
-    btn.classList.add('bg-gray-100','hover:bg-gray-200','text-gray-700')
-  })
-  const activeBtn = document.getElementById('tab-'+name)
-  if(activeBtn) {
-    activeBtn.classList.add('tab-active')
-    activeBtn.classList.remove('bg-gray-100','hover:bg-gray-200','text-gray-700')
-  }
-  // 탭별 초기 로드
-  if(name==='monthly') loadMonthly()
-  if(name==='stats') loadStats()
-  if(name==='leave') loadLeaveRequests()
-}
-
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 출퇴근 등록
-// ═══════════════════════════════════════════════════
-function setStatus(s) {
+// ══════════════════════════════════════════════
+function setStatus(s, el) {
   selectedStatus = s
   document.getElementById('reg-status').value = s
-  document.getElementById('reg-status-display').textContent = '선택: '+s
-  document.getElementById('reg-status-display').className = 'mb-3 text-center text-sm font-semibold h-6 py-1 px-2 rounded '+STATUS_COLORS[s]
+  document.querySelectorAll('.status-pill').forEach(p=>p.classList.remove('selected'))
+  if(el) el.classList.add('selected')
 
-  // 시간 자동 설정
+  const disp = document.getElementById('reg-status-display')
+  disp.innerHTML = \`<span class="badge badge-\${s}" style="font-size:13px;padding:4px 16px;">\${s} 선택됨</span>\`
+
   const timeEl = document.getElementById('reg-time')
   if(s==='연차'||s==='병가'||s==='경조휴가'||s==='공가') {
-    timeEl.value = ''
-    timeEl.disabled = true
+    timeEl.disabled=true; timeEl.value=''
   } else if(s==='퇴근') {
-    timeEl.disabled = false
-    if(!timeEl.value) timeEl.value='18:00'
+    timeEl.disabled=false; if(!timeEl.value) timeEl.value='18:00'
   } else if(s==='오전반차') {
-    timeEl.disabled = false
-    timeEl.value='13:00'
+    timeEl.disabled=false; timeEl.value='13:00'
   } else if(s==='오후반차') {
-    timeEl.disabled = false
-    timeEl.value='08:35'
+    timeEl.disabled=false; timeEl.value='08:35'
   } else {
-    timeEl.disabled = false
+    timeEl.disabled=false
     if(!timeEl.value) {
-      const now = new Date()
-      timeEl.value = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')
+      const n=new Date()
+      timeEl.value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')
     }
   }
-  document.querySelectorAll('.status-btn').forEach(btn => btn.style.outline='')
-  event.target.style.outline='2px solid #1e40af'
 }
 
 async function submitAttendance() {
@@ -759,198 +1041,191 @@ async function submitAttendance() {
   const timeVal = document.getElementById('reg-time').value
   const note = document.getElementById('reg-note').value
 
-  if(!employee_id) return showToast('직원을 선택하세요','error')
+  if(!employee_id) return showToast('직원 카드를 클릭하세요','error')
   if(!work_date) return showToast('날짜를 선택하세요','error')
   if(!status) return showToast('상태를 선택하세요','error')
 
-  let check_in = null, check_out = null
-  if(status==='출근') check_in = timeVal
-  else if(status==='퇴근') check_out = timeVal
-  else if(status==='오전반차') check_out = timeVal  // 오전반차: 오후 출근
-  else if(status==='오후반차') check_in = timeVal   // 오후반차: 오전 출근 후 오후 반차
+  let check_in=null, check_out=null
+  if(status==='출근') check_in=timeVal
+  else if(status==='퇴근') check_out=timeVal
+  else if(status==='오전반차') { check_in='13:00'; check_out='18:00' }
+  else if(status==='오후반차') { check_in=timeVal; check_out='13:00' }
 
-  const r = await fetch('/api/attendance', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({employee_id: parseInt(employee_id), work_date, status, check_in, check_out, note})
+  const r = await fetch('/api/attendance',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({employee_id:parseInt(employee_id),work_date,status,check_in,check_out,note})
   })
   const data = await r.json()
   if(data.ok) {
     showToast('등록 완료!','success')
     closeRegPanel()
-    renderEmpCards()
-  } else {
-    showToast(data.error||'오류 발생','error')
-  }
+    loadCardStatuses()
+    loadKPI()
+    loadMonthSummaryTable()
+  } else showToast(data.error||'오류','error')
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 월별 근무현황
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 async function loadMonthly() {
   const year = document.getElementById('monthly-year').value
   const month = document.getElementById('monthly-month').value
-  const r = await fetch(\`/api/attendance/monthly?year=\${year}&month=\${month}\`)
+  const r = await fetch('/api/attendance/monthly?year='+year+'&month='+month)
   const data = await r.json()
-
   const container = document.getElementById('monthly-table')
-  if(!data.data) { container.innerHTML='<p class="text-gray-400">데이터 없음</p>'; return }
+  if(!data.data) { container.innerHTML='<p style="color:#9ca3af;text-align:center;padding:32px;">데이터 없음</p>'; return }
 
-  // 날짜별, 직원별 매핑
   const records = data.data
-  const dateSet = new Set()
-  const empSet = new Set()
-  const empNames = {}
   const map = {}
-
+  const empNames = {}
   records.forEach(r => {
-    dateSet.add(r.work_date)
-    empSet.add(r.employee_id)
     empNames[r.employee_id] = r.name
     if(!map[r.work_date]) map[r.work_date] = {}
     map[r.work_date][r.employee_id] = r
   })
 
-  // 해당 월 모든 날짜 생성
   const allDates = []
   const d = new Date(year, month-1, 1)
-  while(d.getMonth() === month-1) {
-    allDates.push(d.toISOString().slice(0,10))
-    d.setDate(d.getDate()+1)
-  }
+  while(d.getMonth()===month-1) { allDates.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1) }
 
   const empIds = employees.map(e=>e.id)
+  const holidays = ['2026-01-01','2026-01-28','2026-01-29','2026-01-30','2026-03-01','2026-03-02','2026-05-05','2026-06-06']
 
-  // 공휴일 (간단히 주말만)
-  const isHoliday = (dateStr) => {
-    const dow = new Date(dateStr).getDay()
-    return dow===0||dow===6
-  }
-  const isSpecialHoliday = (dateStr) => {
-    const holidays = ['2026-01-01','2026-01-28','2026-01-29','2026-01-30','2026-03-01','2026-03-02','2026-05-05','2026-06-06']
-    return holidays.includes(dateStr)
-  }
-
-  let html = \`
-    <div class="text-center font-bold text-xl mb-4 print-area">
-      산청인애노인통합지원센터 \${year}년 \${month}월 근무상황부
-    </div>
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th class="w-20">날짜</th>
-          <th class="w-8">요일</th>
-          \${empIds.map(id=>\`<th>\${empNames[id]||id}</th>\`).join('')}
-          <th>비고</th>
-        </tr>
-      </thead>
-      <tbody>
-  \`
+  let html = \`<div style="text-align:center;font-weight:800;font-size:16px;margin-bottom:12px;">
+    산청인애노인통합지원센터 \${year}년 \${month}월 근무상황부
+  </div>
+  <table class="monthly-tbl"><thead><tr>
+    <th style="width:60px;">날짜</th><th style="width:30px;">요일</th>
+    \${empIds.map(id=>\`<th>\${empNames[id]||id}</th>\`).join('')}
+    <th>비고</th>
+  </tr></thead><tbody>\`
 
   allDates.forEach(dateStr => {
     const dow = new Date(dateStr).getDay()
-    const dayName = DAYS[dow]
     const isWknd = dow===0||dow===6
-    const isHol = isSpecialHoliday(dateStr)
-    const rowClass = isWknd||isHol ? 'bg-red-50' : ''
-    const dayClass = dow===0?'text-red-500 font-bold': dow===6?'text-blue-500 font-bold':''
-
-    html += \`<tr class="\${rowClass}">\`
-    html += \`<td class="text-xs">\${dateStr.slice(5)}</td>\`
-    html += \`<td class="\${dayClass} text-xs">\${dayName}</td>\`
-
+    const isHol = holidays.includes(dateStr)
+    const cls = isWknd||isHol ? 'weekend' : ''
+    const dayColor = dow===0?'style="color:#dc2626;font-weight:700;"':dow===6?'style="color:#1d4ed8;font-weight:700;"':''
+    html += \`<tr class="\${cls}"><td>\${dateStr.slice(5)}</td><td \${dayColor}>\${DAYS[dow]}</td>\`
     empIds.forEach(eid => {
+      if(isWknd||isHol) { html += \`<td style="color:#9ca3af;font-size:11px;">휴무</td>\`; return }
       const rec = map[dateStr]?.[eid]
-      if(isWknd||isHol) {
-        html += \`<td class="text-gray-400 text-xs">휴무</td>\`
-      } else if(rec) {
-        const sc = STATUS_COLORS[rec.status]||''
-        const display = rec.status==='출근'
-          ? (rec.check_in||rec.status)
-          : rec.status
-        html += \`<td class="\${sc} text-xs font-medium">\${display}</td>\`
-      } else {
-        html += \`<td class="text-gray-300 text-xs">-</td>\`
-      }
+      if(rec) {
+        const display = rec.status==='출근' ? (rec.check_in||'출근') : rec.status
+        html += \`<td><span class="badge badge-\${rec.status}" style="font-size:10px;">\${display}</span></td>\`
+      } else html += \`<td style="color:#d1d5db;">-</td>\`
     })
-
-    const notes = []
-    if(isHol) notes.push(isSpecialHoliday(dateStr)?'공휴일':'')
-    html += \`<td class="text-xs text-gray-500">\${notes.join(', ')}</td>\`
-    html += \`</tr>\`
+    html += \`<td style="font-size:11px;color:#6b7280;">\${isHol?'공휴일':''}</td></tr>\`
   })
-
   html += '</tbody></table>'
   container.innerHTML = html
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 통계
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 async function loadStats() {
   const year = document.getElementById('stats-year').value
   const month = document.getElementById('stats-month').value
-  let url, title
-
-  if(month) {
-    url = \`/api/stats/monthly?year=\${year}&month=\${month}\`
-    title = \`\${year}년 \${month}월 근무 통계\`
-  } else {
-    url = \`/api/stats/yearly?year=\${year}\`
-    title = \`\${year}년 연간 누적 통계\`
-  }
-
+  const url = month ? '/api/stats/monthly?year='+year+'&month='+month : '/api/stats/yearly?year='+year
+  const title = month ? year+'년 '+month+'월 근무 통계' : year+'년 연간 누적 통계'
   const r = await fetch(url)
   const data = await r.json()
   const container = document.getElementById('stats-table')
-  if(!data.data) { container.innerHTML='<p class="text-gray-400">데이터 없음</p>'; return }
+  if(!data.data) { container.innerHTML=''; return }
 
-  const rows = data.data
+  let html = \`<div style="font-weight:800;color:#1e3a8a;font-size:15px;margin-bottom:14px;text-align:center;">\${title}</div>
+  <div style="overflow-x:auto;"><table class="stats-tbl"><thead><tr>
+    <th style="text-align:left;">성명</th>
+    <th>출근일수</th><th>연차(일)</th><th>오전반차</th><th>오후반차</th>
+    <th>반차환산(일)</th><th>병가</th><th>경조휴가</th><th>공가</th>
+    \${!month?'<th>총 연차환산</th>':''}
+  </tr></thead><tbody>\`
 
-  let html = \`
-    <h3 class="font-bold text-blue-900 mb-4 text-center">\${title}</h3>
-    <div class="overflow-x-auto">
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th>성명</th>
-          <th>출근일수</th>
-          <th>연차(일)</th>
-          <th>오전반차(회)</th>
-          <th>오후반차(회)</th>
-          <th>반차환산(일)</th>
-          <th>병가(일)</th>
-          <th>경조휴가(일)</th>
-          <th>공가(일)</th>
-          \${!month?'<th>총 연차환산</th>':''}
-        </tr>
-      </thead>
-      <tbody>
-  \`
-
-  rows.forEach(r => {
-    const halfDays = ((r.am_half||0)+(r.pm_half||0)) * 0.5
+  data.data.forEach(row => {
+    const halfDays = ((row.am_half||0)+(row.pm_half||0))*0.5
+    const total = (row.annual_leave||0)+halfDays
     html += \`<tr>
-      <td class="font-medium">\${r.name}</td>
-      <td>\${r.work_count||0}</td>
-      <td>\${r.annual_leave||0}</td>
-      <td>\${r.am_half||0}</td>
-      <td>\${r.pm_half||0}</td>
-      <td>\${halfDays}</td>
-      <td>\${r.sick_leave||0}</td>
-      <td>\${r.family_leave||0}</td>
-      <td>\${r.official_leave||0}</td>
-      \${!month?\`<td class="font-bold text-blue-800">\${(r.annual_leave||0)+halfDays}</td>\`:''}
+      <td class="name-cell">\${row.name}</td>
+      <td><b style="color:#15803d;">\${row.work_count||0}</b></td>
+      <td><b style="color:#b45309;">\${row.annual_leave||0}</b></td>
+      <td>\${row.am_half||0}</td><td>\${row.pm_half||0}</td>
+      <td style="color:#6d28d9;font-weight:700;">\${halfDays}</td>
+      <td style="color:#dc2626;">\${row.sick_leave||0}</td>
+      <td style="color:#c2410c;">\${row.family_leave||0}</td>
+      <td style="color:#0369a1;">\${row.official_leave||0}</td>
+      \${!month?\`<td><b style="color:#1d4ed8;font-size:15px;">\${total}</b></td>\`:''}
     </tr>\`
   })
-
   html += '</tbody></table></div>'
   container.innerHTML = html
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// 연간 연차 발생/사용/잔여
+// ══════════════════════════════════════════════
+// 근속년수로 연차 발생일수 계산 (2026년 기준 단순 계산)
+function calcAnnualAllowance(yearsWorked) {
+  if(yearsWorked < 1) return Math.min(Math.floor(yearsWorked*12), 11)
+  if(yearsWorked < 3) return 15
+  // 3년 이상: 15 + floor((yearsWorked-1)/2) 단 최대 25
+  return Math.min(15 + Math.floor((yearsWorked-1)/2), 25)
+}
+
+async function loadAnnualLeave() {
+  const year = document.getElementById('annual-year').value
+  const r = await fetch('/api/stats/yearly?year='+year)
+  const d = await r.json()
+  const container = document.getElementById('annual-leave-table')
+  if(!d.data||!container) return
+
+  // 직원별 입사년도 (없으면 2020년 기준으로 계산)
+  const hireYears = {1:2018, 2:2019, 3:2017, 4:2021, 5:2023}
+
+  let html = \`<div style="overflow-x:auto;"><table class="stats-tbl"><thead><tr>
+    <th style="text-align:left;">성명</th>
+    <th>입사년도</th><th>근속(년)</th>
+    <th>연차발생(일)</th><th>연차사용(일)</th><th>반차사용(회)</th><th>반차환산(일)</th>
+    <th>총사용(일)</th><th style="background:#1e3a8a;">잔여연차(일)</th>
+    <th>사용률(%)</th>
+  </tr></thead><tbody>\`
+
+  d.data.forEach(row => {
+    const hireYear = hireYears[row.employee_id] || 2020
+    const yearsWorked = parseInt(year) - hireYear
+    const allowance = calcAnnualAllowance(yearsWorked)
+    const halfDays = ((row.am_half||0)+(row.pm_half||0))*0.5
+    const usedDays = (row.annual_leave||0) + halfDays
+    const remaining = Math.max(0, allowance - usedDays)
+    const usageRate = allowance > 0 ? Math.round(usedDays/allowance*100) : 0
+    const barColor = usageRate > 80 ? '#dc2626' : usageRate > 50 ? '#f59e0b' : '#16a34a'
+
+    html += \`<tr>
+      <td class="name-cell">\${row.name}</td>
+      <td style="color:#6b7280;">\${hireYear}</td>
+      <td style="font-weight:600;">\${yearsWorked}년</td>
+      <td><b style="color:#1d4ed8;font-size:15px;">\${allowance}일</b></td>
+      <td style="color:#b45309;">\${row.annual_leave||0}일</td>
+      <td>\${(row.am_half||0)+(row.pm_half||0)}회</td>
+      <td style="color:#6d28d9;">\${halfDays}일</td>
+      <td><b style="color:#374151;">\${usedDays}일</b></td>
+      <td><b style="\${remaining===0?'color:#dc2626':'color:#15803d;'};font-size:15px;">\${remaining}일</b></td>
+      <td>
+        <div style="min-width:80px;">
+          <div class="progress-bar"><div class="progress-fill" style="width:\${usageRate}%;background:\${barColor};"></div></div>
+          <div style="font-size:11px;color:\${barColor};font-weight:700;margin-top:2px;">\${usageRate}%</div>
+        </div>
+      </td>
+    </tr>\`
+  })
+  html += '</tbody></table></div>'
+  container.innerHTML = html
+}
+
+// ══════════════════════════════════════════════
 // 개인별 출력
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 async function loadPrint() {
   const eid = document.getElementById('print-employee').value
   const year = document.getElementById('print-year').value
@@ -958,40 +1233,28 @@ async function loadPrint() {
   if(!eid) return showToast('직원을 선택하세요','error')
 
   const emp = employees.find(e=>e.id==eid)
-  const r = await fetch(\`/api/attendance/monthly?year=\${year}&month=\${month}&employee_id=\${eid}\`)
+  const r = await fetch('/api/attendance/monthly?year='+year+'&month='+month+'&employee_id='+eid)
   const data = await r.json()
 
   const allDates = []
   const d = new Date(year, month-1, 1)
-  while(d.getMonth() === month-1) {
-    allDates.push(d.toISOString().slice(0,10))
-    d.setDate(d.getDate()+1)
-  }
+  while(d.getMonth()===month-1) { allDates.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1) }
 
   const map = {}
-  ;(data.data||[]).forEach(rec => { map[rec.work_date] = rec })
+  ;(data.data||[]).forEach(rec => { map[rec.work_date]=rec })
 
-  const specialHolidays = ['2026-01-01','2026-01-28','2026-01-29','2026-01-30','2026-03-01','2026-03-02','2026-05-05','2026-06-06']
-  const isHol = (d) => specialHolidays.includes(d)
-
+  const holidays = ['2026-01-01','2026-01-28','2026-01-29','2026-01-30','2026-03-01','2026-03-02','2026-05-05','2026-06-06']
   let workCount=0, annualLeave=0, amHalf=0, pmHalf=0, sickLeave=0, familyLeave=0, officialLeave=0
 
   const rows = allDates.map(dateStr => {
     const dow = new Date(dateStr).getDay()
     const isWknd = dow===0||dow===6
-    const isHoliday = isHol(dateStr)
+    const isHol = holidays.includes(dateStr)
     const rec = map[dateStr]
-
-    let statusDisplay = '-'
-    let checkIn = '-', checkOut = '-'
-    let rowClass = ''
-
-    if(isWknd||isHoliday) {
-      statusDisplay = '휴무'; rowClass = 'bg-red-50'
-    } else if(rec) {
-      statusDisplay = rec.status
-      checkIn = rec.check_in||'-'
-      checkOut = rec.check_out||'-'
+    let statusDisplay='-', checkIn='-', checkOut='-', rowStyle=''
+    if(isWknd||isHol) { statusDisplay='휴무'; rowStyle='background:#fff7f7;' }
+    else if(rec) {
+      statusDisplay=rec.status; checkIn=rec.check_in||'-'; checkOut=rec.check_out||'-'
       if(rec.status==='출근') workCount++
       if(rec.status==='연차') annualLeave++
       if(rec.status==='오전반차') amHalf++
@@ -1000,66 +1263,103 @@ async function loadPrint() {
       if(rec.status==='경조휴가') familyLeave++
       if(rec.status==='공가') officialLeave++
     }
-
-    const sc = STATUS_COLORS[statusDisplay]||''
-    return \`<tr class="\${rowClass}">
+    const dayStyle = dow===0?'color:#dc2626;':dow===6?'color:#1d4ed8;':''
+    return \`<tr style="\${rowStyle}">
       <td>\${dateStr.slice(5)}</td>
-      <td class="\${dow===0?'text-red-500':dow===6?'text-blue-500':''}">\${DAYS[dow]}</td>
-      <td class="\${sc} font-medium">\${statusDisplay}</td>
-      <td>\${checkIn}</td>
-      <td>\${checkOut}</td>
-      <td class="text-xs text-gray-400">\${rec?.note||''}</td>
+      <td style="\${dayStyle}">\${DAYS[dow]}</td>
+      <td><span class="badge badge-\${statusDisplay}" style="font-size:11px;">\${statusDisplay}</span></td>
+      <td>\${checkIn}</td><td>\${checkOut}</td>
+      <td style="font-size:11px;color:#6b7280;">\${rec?.note||''}</td>
     </tr>\`
   }).join('')
 
-  const html = \`
-    <div class="print-area">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-blue-900">산청인애노인통합지원센터</h2>
-        <h3 class="text-xl font-semibold mt-1">\${year}년 \${month}월 근무상황부</h3>
-        <p class="text-gray-600 mt-1">성명: <strong>\${emp?.name||''}</strong> · 직책: \${emp?.position||''}</p>
-      </div>
-      <table class="print-table mb-6">
-        <thead>
-          <tr><th>날짜</th><th>요일</th><th>상태</th><th>출근시간</th><th>퇴근시간</th><th>비고</th></tr>
-        </thead>
-        <tbody>\${rows}</tbody>
-      </table>
-      <div class="grid grid-cols-4 gap-3 text-center border rounded-xl overflow-hidden mb-6">
-        <div class="bg-green-50 p-3"><div class="text-xs text-gray-500">출근일수</div><div class="text-xl font-bold text-green-700">\${workCount}</div></div>
-        <div class="bg-yellow-50 p-3"><div class="text-xs text-gray-500">연차</div><div class="text-xl font-bold text-yellow-700">\${annualLeave}일</div></div>
-        <div class="bg-purple-50 p-3"><div class="text-xs text-gray-500">반차</div><div class="text-xl font-bold text-purple-700">\${amHalf+pmHalf}회</div></div>
-        <div class="bg-red-50 p-3"><div class="text-xs text-gray-500">병가/기타</div><div class="text-xl font-bold text-red-700">\${sickLeave+familyLeave+officialLeave}일</div></div>
-      </div>
-      <div class="text-right text-sm text-gray-500">출력일: \${new Date().toLocaleDateString('ko-KR')}</div>
+  const html = \`<div class="print-area">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:14px;color:#6b7280;margin-bottom:4px;">산청인애노인통합지원센터</div>
+      <div style="font-size:22px;font-weight:900;color:#1e3a8a;">\${year}년 \${month}월 근무상황부</div>
+      <div style="font-size:14px;color:#374151;margin-top:6px;">성명: <b>\${emp?.name||''}</b> · 직책: \${emp?.position||''}</div>
     </div>
-  \`
+    <table style="border-collapse:collapse;width:100%;margin-bottom:16px;">
+      <thead><tr style="background:#1e3a8a;color:#fff;">
+        <th style="padding:8px;border:1px solid #1e40af;">날짜</th>
+        <th style="padding:8px;border:1px solid #1e40af;">요일</th>
+        <th style="padding:8px;border:1px solid #1e40af;">상태</th>
+        <th style="padding:8px;border:1px solid #1e40af;">출근</th>
+        <th style="padding:8px;border:1px solid #1e40af;">퇴근</th>
+        <th style="padding:8px;border:1px solid #1e40af;">비고</th>
+      </tr></thead>
+      <tbody>\${rows}</tbody>
+    </table>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;">
+      <div style="background:#f0fdf4;border-radius:10px;padding:14px;text-align:center;border:1px solid #bbf7d0;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">출근일수</div>
+        <div style="font-size:24px;font-weight:800;color:#15803d;">\${workCount}</div>
+      </div>
+      <div style="background:#fffbeb;border-radius:10px;padding:14px;text-align:center;border:1px solid #fde68a;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">연차</div>
+        <div style="font-size:24px;font-weight:800;color:#b45309;">\${annualLeave}일</div>
+      </div>
+      <div style="background:#f5f3ff;border-radius:10px;padding:14px;text-align:center;border:1px solid #ddd6fe;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">반차</div>
+        <div style="font-size:24px;font-weight:800;color:#6d28d9;">\${amHalf+pmHalf}회</div>
+      </div>
+      <div style="background:#fff1f2;border-radius:10px;padding:14px;text-align:center;border:1px solid #fecdd3;">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px;">병가/기타</div>
+        <div style="font-size:24px;font-weight:800;color:#dc2626;">\${sickLeave+familyLeave+officialLeave}일</div>
+      </div>
+    </div>
+    <div style="text-align:right;font-size:12px;color:#9ca3af;">출력일: \${new Date().toLocaleDateString('ko-KR')}</div>
+  </div>\`
   document.getElementById('print-area').innerHTML = html
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 연차 신청서
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 async function submitLeaveRequest() {
   const employee_id = document.getElementById('lr-employee').value
   const leave_type = document.getElementById('lr-type').value
   const leave_start = document.getElementById('lr-start').value
   const leave_end = document.getElementById('lr-end').value
-  const reason = document.getElementById('lr-reason').value
-  const handover = document.getElementById('lr-handover').value
+  const reason = document.getElementById('lr-reason').innerText.trim()
+  const handover = document.getElementById('lr-handover').innerText.trim()
+  const applicant_sign = document.getElementById('sign-applicant-view')?.innerText||''
+  const applicant_date = document.getElementById('date-applicant-view')?.value||''
+  const social_worker_sign = document.getElementById('sign-social-view')?.innerText||''
+  const social_worker_date = document.getElementById('date-social-view')?.value||''
+  const director_sign = document.getElementById('sign-director-view')?.innerText||''
+  const director_date = document.getElementById('date-director-view')?.value||''
 
   if(!employee_id||!leave_start||!leave_end) return showToast('필수 항목을 입력하세요','error')
 
   const r = await fetch('/api/leave-requests',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({employee_id:parseInt(employee_id), leave_type, leave_start, leave_end, reason, handover})
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({employee_id:parseInt(employee_id),leave_type,leave_start,leave_end,reason,handover,
+      applicant_sign,applicant_date,social_worker_sign,social_worker_date,director_sign,director_date})
   })
   const data = await r.json()
-  if(data.ok) {
-    showToast('신청서가 저장되었습니다','success')
-    loadLeaveRequests()
-  }
+  if(data.ok) { showToast('신청서가 저장되었습니다','success'); loadLeaveRequests() }
+}
+
+function resetLeaveForm() {
+  const today = new Date().toISOString().slice(0,10)
+  document.getElementById('lr-start').value = today
+  document.getElementById('lr-end').value = today
+  document.getElementById('lr-reason').innerText = ''
+  document.getElementById('lr-handover').innerText = ''
+  ;['sign-applicant-view','sign-social-view','sign-director-view'].forEach(id=>{
+    const el = document.getElementById(id)
+    if(el) el.innerText=''
+  })
+  ;['date-applicant-view','date-social-view','date-director-view'].forEach(id=>{
+    const el = document.getElementById(id)
+    if(el) el.value=''
+  })
+  calcLrDays()
+}
+
+function printLeaveForm() {
+  window.print()
 }
 
 async function loadLeaveRequests() {
@@ -1067,306 +1367,180 @@ async function loadLeaveRequests() {
   const data = await r.json()
   const container = document.getElementById('leave-list')
   if(!data.data||data.data.length===0) {
-    container.innerHTML='<p class="text-gray-400 text-sm py-4 text-center">신청서가 없습니다</p>'
+    container.innerHTML='<div style="text-align:center;padding:32px;color:#9ca3af;font-size:13px;"><i class="fas fa-inbox" style="font-size:24px;display:block;margin-bottom:8px;"></i>신청서 없음</div>'
     return
   }
-
   container.innerHTML = data.data.map(lr => \`
-    <div class="border rounded-xl p-4 mb-3 hover:border-blue-300 transition">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-gray-800">\${lr.name}</span>
-          <span class="px-2 py-0.5 rounded-full text-xs font-medium \${STATUS_COLORS[lr.leave_type]||'bg-gray-100 text-gray-600'}">\${lr.leave_type}</span>
-          <span class="text-sm text-gray-500">\${lr.leave_start} ~ \${lr.leave_end}</span>
+    <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;margin-bottom:10px;transition:.15s;cursor:pointer;" 
+         onmouseenter="this.style.borderColor='#2563eb'" onmouseleave="this.style.borderColor='#e5e7eb'">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-weight:700;color:#1e3a8a;">\${lr.name}</span>
+          <span class="badge badge-\${lr.leave_type}" style="font-size:11px;">\${lr.leave_type}</span>
         </div>
-        <div class="flex gap-2">
-          <button onclick="openLeaveModal(\${lr.id})" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs hover:bg-blue-200">
-            <i class="fas fa-eye mr-1"></i>보기/결재
-          </button>
-          <button onclick="deleteLeave(\${lr.id})" class="bg-red-100 text-red-700 px-3 py-1 rounded text-xs hover:bg-red-200">삭제</button>
+        <div style="display:flex;gap:6px;">
+          <button onclick="openLeaveDetail(\${lr.id})" class="btn btn-gray btn-sm"><i class="fas fa-eye"></i></button>
+          <button onclick="deleteLeave(\${lr.id})" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
         </div>
       </div>
-      <div class="text-xs text-gray-500">\${lr.reason||'(사유 없음)'}</div>
+      <div style="font-size:12px;color:#6b7280;">\${lr.leave_start} ~ \${lr.leave_end}</div>
+      <div style="font-size:12px;color:#374151;margin-top:4px;">\${lr.reason||'(사유 없음)'}</div>
     </div>
   \`).join('')
 }
 
-let currentLeaveData = null
-
-async function openLeaveModal(id) {
-  const r = await fetch('/api/leave-requests?year=2026')
-  const data = await r.json()
-  const lr = data.data.find(x=>x.id===id)
+let allLeaveData = []
+async function openLeaveDetail(id) {
+  if(!allLeaveData.length) {
+    const r = await fetch('/api/leave-requests?year=2026')
+    const d = await r.json()
+    allLeaveData = d.data||[]
+  }
+  const lr = allLeaveData.find(x=>x.id===id)
   if(!lr) return
-  currentLeaveData = lr
-  currentLeaveId = id
 
-  const emp = employees.find(e=>e.id===lr.employee_id)||{}
-  const modal = document.getElementById('leave-modal')
-  const content = document.getElementById('leave-print-content')
+  // 폼에 데이터 채우기
+  const emp = employees.find(e=>e.id===lr.employee_id)
+  const lrEmp = document.getElementById('lr-employee')
+  if(lrEmp) { lrEmp.value = lr.employee_id; lrEmp.dispatchEvent(new Event('change')) }
 
-  content.innerHTML = \`
-    <div class="print-area">
-      <div class="text-center mb-6">
-        <h2 class="text-2xl font-bold text-blue-900 border-b-2 border-blue-900 pb-2">연 차 사 용 신 청 서</h2>
-        <p class="text-sm text-gray-500 mt-1">산청인애노인통합지원센터</p>
-      </div>
+  const lt = document.getElementById('lr-type')
+  if(lt) lt.value = lr.leave_type
+  const ls = document.getElementById('lr-start')
+  if(ls) ls.value = lr.leave_start
+  const le = document.getElementById('lr-end')
+  if(le) le.value = lr.leave_end
+  const lrReason = document.getElementById('lr-reason')
+  if(lrReason) lrReason.innerText = lr.reason||''
+  const lrHandover = document.getElementById('lr-handover')
+  if(lrHandover) lrHandover.innerText = lr.handover||''
 
-      <!-- 결재란 -->
-      <div class="approval-grid mb-6">
-        <div class="approval-cell bg-blue-50 font-bold text-blue-900">담당</div>
-        <div class="approval-cell bg-blue-50 font-bold text-blue-900">전문사회복지사</div>
-        <div class="approval-cell bg-blue-50 font-bold text-blue-900">센터장</div>
-        <div class="approval-cell min-h-16">
-          <div id="sign-applicant" class="sign-box" contenteditable="true" style="min-height:50px">\${lr.applicant_sign||''}</div>
-          <div class="text-xs mt-1">
-            <input id="date-applicant" type="text" value="\${lr.applicant_date||''}" placeholder="서명일자" style="font-size:10px;padding:2px;text-align:center">
-          </div>
-        </div>
-        <div class="approval-cell min-h-16">
-          <div id="sign-social" class="sign-box" contenteditable="true" style="min-height:50px">\${lr.social_worker_sign||''}</div>
-          <div class="text-xs mt-1">
-            <input id="date-social" type="text" value="\${lr.social_worker_date||''}" placeholder="서명일자" style="font-size:10px;padding:2px;text-align:center">
-          </div>
-        </div>
-        <div class="approval-cell min-h-16">
-          <div id="sign-director" class="sign-box" contenteditable="true" style="min-height:50px">\${lr.director_sign||''}</div>
-          <div class="text-xs mt-1">
-            <input id="date-director" type="text" value="\${lr.director_date||''}" placeholder="서명일자" style="font-size:10px;padding:2px;text-align:center">
-          </div>
-        </div>
-      </div>
+  // 결재란
+  const sa = document.getElementById('sign-applicant-view')
+  if(sa) sa.innerText = lr.applicant_sign||''
+  const ss = document.getElementById('sign-social-view')
+  if(ss) ss.innerText = lr.social_worker_sign||''
+  const sd = document.getElementById('sign-director-view')
+  if(sd) sd.innerText = lr.director_sign||''
+  const da = document.getElementById('date-applicant-view')
+  if(da) da.value = lr.applicant_date||''
+  const ds = document.getElementById('date-social-view')
+  if(ds) ds.value = lr.social_worker_date||''
+  const dd = document.getElementById('date-director-view')
+  if(dd) dd.value = lr.director_date||''
 
-      <!-- 신청 내용 -->
-      <table class="print-table mb-4">
-        <tr>
-          <th class="w-32 bg-blue-50">신청자</th>
-          <td class="font-bold">\${lr.name}</td>
-          <th class="w-32 bg-blue-50">제출일</th>
-          <td>\${lr.created_at?.slice(0,10)||''}</td>
-        </tr>
-        <tr>
-          <th class="bg-blue-50">휴가 사용 기간</th>
-          <td>\${lr.leave_start} ~ \${lr.leave_end}</td>
-          <th class="bg-blue-50">휴가 구분</th>
-          <td class="font-bold">\${lr.leave_type}</td>
-        </tr>
-        <tr>
-          <th class="bg-blue-50">사유</th>
-          <td colspan="3">
-            <div id="lr-edit-reason" contenteditable="true" class="min-h-8 p-1">\${lr.reason||''}</div>
-          </td>
-        </tr>
-        <tr>
-          <th class="bg-blue-50">주요 업무<br>인수인계 사항</th>
-          <td colspan="3">
-            <div id="lr-edit-handover" contenteditable="true" class="min-h-16 p-1" style="min-height:60px">\${lr.handover||''}</div>
-          </td>
-        </tr>
-      </table>
-
-      <div class="text-center text-sm text-gray-500 mt-4">
-        위와 같이 휴가 사용을 신청합니다.<br>
-        <span class="font-medium">\${lr.leave_start?.slice(0,4)}년 \${lr.leave_start?.slice(5,7)}월 \${lr.leave_start?.slice(8,10)}일</span>
-      </div>
-    </div>
-    <div class="flex gap-2 mt-4 no-print">
-      <button onclick="saveLeaveEdits(\${id})" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">
-        <i class="fas fa-save mr-1"></i>변경사항 저장
-      </button>
-    </div>
-  \`
-  modal.classList.remove('hidden')
-}
-
-async function saveLeaveEdits(id) {
-  const lr = currentLeaveData
-  const updates = {
-    leave_start: lr.leave_start,
-    leave_end: lr.leave_end,
-    leave_type: lr.leave_type,
-    reason: document.getElementById('lr-edit-reason')?.innerText || lr.reason,
-    handover: document.getElementById('lr-edit-handover')?.innerText || lr.handover,
-    applicant_sign: document.getElementById('sign-applicant')?.innerText || '',
-    applicant_date: document.getElementById('date-applicant')?.value || '',
-    social_worker_sign: document.getElementById('sign-social')?.innerText || '',
-    social_worker_date: document.getElementById('date-social')?.value || '',
-    director_sign: document.getElementById('sign-director')?.innerText || '',
-    director_date: document.getElementById('date-director')?.value || '',
-    status: lr.status
-  }
-  const r = await fetch('/api/leave-requests/'+id, {
-    method:'PUT',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(updates)
-  })
-  const data = await r.json()
-  if(data.ok) {
-    showToast('저장되었습니다','success')
-    loadLeaveRequests()
-  }
-}
-
-function closeLeaveModal() {
-  document.getElementById('leave-modal').classList.add('hidden')
+  calcLrDays()
+  showToast(lr.name+' 신청서를 불러왔습니다','info')
+  // 폼으로 스크롤
+  document.getElementById('leave-form-area')?.scrollIntoView({behavior:'smooth'})
 }
 
 async function deleteLeave(id) {
   if(!confirm('삭제하시겠습니까?')) return
-  const r = await fetch('/api/leave-requests/'+id, {method:'DELETE'})
+  const r = await fetch('/api/leave-requests/'+id,{method:'DELETE'})
   const data = await r.json()
-  if(data.ok) { showToast('삭제되었습니다','success'); loadLeaveRequests() }
+  if(data.ok) {
+    showToast('삭제되었습니다','success')
+    allLeaveData = []
+    loadLeaveRequests()
+  }
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 // 직원 관리
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function renderEmployeeList() {
   const container = document.getElementById('employee-list')
   if(!container) return
   if(employees.length===0) {
-    container.innerHTML='<p class="text-gray-400 text-sm py-4 text-center">등록된 직원이 없습니다</p>'
+    container.innerHTML='<div style="text-align:center;padding:32px;color:#9ca3af;">직원 없음</div>'
     return
   }
-  container.innerHTML = \`
-    <div class="overflow-x-auto">
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th class="w-10">번호</th>
-          <th>성명</th>
-          <th>직책</th>
-          <th class="w-40 no-print">관리</th>
-        </tr>
-      </thead>
-      <tbody>
-        \${employees.map((e,idx)=>\`
-          <tr id="emp-row-\${e.id}">
-            <td class="text-center text-gray-500">\${idx+1}</td>
-            <td>
-              <span id="emp-name-text-\${e.id}" class="font-medium">\${e.name}</span>
-              <input id="emp-name-input-\${e.id}" type="text" value="\${e.name}"
-                class="text-sm border rounded px-2 py-1 w-full"
-                style="display:none">
-            </td>
-            <td>
-              <span id="emp-pos-text-\${e.id}">\${e.position||''}</span>
-              <input id="emp-pos-input-\${e.id}" type="text" value="\${e.position||''}"
-                placeholder="직책 입력"
-                class="text-sm border rounded px-2 py-1 w-full"
-                style="display:none">
-            </td>
-            <td class="no-print">
-              <div id="emp-btn-view-\${e.id}" class="flex gap-1 justify-center">
-                <button onclick="startEditEmployee(\${e.id})"
-                  class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs hover:bg-blue-200 font-medium">
-                  <i class="fas fa-edit mr-1"></i>수정
-                </button>
-                <button onclick="removeEmployee(\${e.id})"
-                  class="bg-red-100 text-red-700 px-3 py-1 rounded text-xs hover:bg-red-200 font-medium">
-                  <i class="fas fa-trash mr-1"></i>삭제
-                </button>
-              </div>
-              <div id="emp-btn-edit-\${e.id}" class="flex gap-1 justify-center" style="display:none">
-                <button onclick="saveEditEmployee(\${e.id})"
-                  class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 font-medium">
-                  <i class="fas fa-check mr-1"></i>저장
-                </button>
-                <button onclick="cancelEditEmployee(\${e.id})"
-                  class="bg-gray-200 text-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-300 font-medium">
-                  취소
-                </button>
-              </div>
-            </td>
-          </tr>
-        \`).join('')}
-      </tbody>
-    </table>
-    </div>
-  \`
+  container.innerHTML = \`<div style="overflow-x:auto;">
+  <table class="stats-tbl"><thead><tr>
+    <th style="width:50px;">번호</th><th style="text-align:left;">성명</th><th>직책</th><th style="width:160px;">관리</th>
+  </tr></thead><tbody>
+  \${employees.map((e,idx)=>\`<tr id="emp-row-\${e.id}">
+    <td style="color:#9ca3af;">\${idx+1}</td>
+    <td style="text-align:left;">
+      <span id="emp-name-text-\${e.id}" style="font-weight:700;color:#1e3a8a;">\${e.name}</span>
+      <input id="emp-name-input-\${e.id}" type="text" value="\${e.name}" style="display:none;width:100px;font-size:13px;padding:4px 8px;">
+    </td>
+    <td>
+      <span id="emp-pos-text-\${e.id}">\${e.position||''}</span>
+      <input id="emp-pos-input-\${e.id}" type="text" value="\${e.position||''}" style="display:none;width:120px;font-size:13px;padding:4px 8px;">
+    </td>
+    <td>
+      <div id="emp-btn-view-\${e.id}" style="display:flex;gap:6px;justify-content:center;">
+        <button onclick="startEditEmployee(\${e.id})" class="btn btn-gray btn-sm"><i class="fas fa-edit"></i> 수정</button>
+        <button onclick="removeEmployee(\${e.id})" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+      </div>
+      <div id="emp-btn-edit-\${e.id}" style="display:none;gap:6px;justify-content:center;">
+        <button onclick="saveEditEmployee(\${e.id})" class="btn btn-success btn-sm"><i class="fas fa-check"></i> 저장</button>
+        <button onclick="cancelEditEmployee(\${e.id})" class="btn btn-gray btn-sm">취소</button>
+      </div>
+    </td>
+  </tr>\`).join('')}
+  </tbody></table></div>\`
 }
 
 function startEditEmployee(id) {
-  // 다른 행 편집 중이면 취소
-  employees.forEach(e => { if(e.id !== id) cancelEditEmployee(e.id) })
-
-  const nameText  = document.getElementById('emp-name-text-' + id)
-  const nameInput = document.getElementById('emp-name-input-' + id)
-  const posText   = document.getElementById('emp-pos-text-'  + id)
-  const posInput  = document.getElementById('emp-pos-input-' + id)
-  const btnView   = document.getElementById('emp-btn-view-'  + id)
-  const btnEdit   = document.getElementById('emp-btn-edit-'  + id)
-
-  nameText.style.display  = 'none'
-  posText.style.display   = 'none'
-  nameInput.style.display = ''
-  posInput.style.display  = ''
-  btnView.style.display   = 'none'
-  btnEdit.style.display   = ''
-
+  employees.forEach(e => { if(e.id!==id) cancelEditEmployee(e.id) })
+  const nameText=document.getElementById('emp-name-text-'+id)
+  const nameInput=document.getElementById('emp-name-input-'+id)
+  const posText=document.getElementById('emp-pos-text-'+id)
+  const posInput=document.getElementById('emp-pos-input-'+id)
+  const btnView=document.getElementById('emp-btn-view-'+id)
+  const btnEdit=document.getElementById('emp-btn-edit-'+id)
+  if(!nameText) return
+  nameText.style.display='none'; posText.style.display='none'
+  nameInput.style.display=''; posInput.style.display=''
+  btnView.style.display='none'; btnEdit.style.display='flex'
   nameInput.focus()
-  // Enter 키로 저장
-  nameInput.onkeydown = (e) => { if(e.key==='Enter') saveEditEmployee(id) }
-  posInput.onkeydown  = (e) => { if(e.key==='Enter') saveEditEmployee(id) }
+  nameInput.onkeydown=e=>{ if(e.key==='Enter') saveEditEmployee(id) }
+  posInput.onkeydown=e=>{ if(e.key==='Enter') saveEditEmployee(id) }
 }
 
 function cancelEditEmployee(id) {
-  const emp = employees.find(e=>e.id===id)
+  const emp=employees.find(e=>e.id===id)
   if(!emp) return
-  const nameText  = document.getElementById('emp-name-text-' + id)
-  const nameInput = document.getElementById('emp-name-input-' + id)
-  const posText   = document.getElementById('emp-pos-text-'  + id)
-  const posInput  = document.getElementById('emp-pos-input-' + id)
-  const btnView   = document.getElementById('emp-btn-view-'  + id)
-  const btnEdit   = document.getElementById('emp-btn-edit-'  + id)
+  const nameText=document.getElementById('emp-name-text-'+id)
+  const nameInput=document.getElementById('emp-name-input-'+id)
+  const posText=document.getElementById('emp-pos-text-'+id)
+  const posInput=document.getElementById('emp-pos-input-'+id)
+  const btnView=document.getElementById('emp-btn-view-'+id)
+  const btnEdit=document.getElementById('emp-btn-edit-'+id)
   if(!nameText) return
-
-  // 원래 값 복원
-  nameInput.value = emp.name
-  posInput.value  = emp.position || ''
-
-  nameText.style.display  = ''
-  posText.style.display   = ''
-  nameInput.style.display = 'none'
-  posInput.style.display  = 'none'
-  btnView.style.display   = ''
-  btnEdit.style.display   = 'none'
+  nameInput.value=emp.name; posInput.value=emp.position||''
+  nameText.style.display=''; posText.style.display=''
+  nameInput.style.display='none'; posInput.style.display='none'
+  btnView.style.display='flex'; btnEdit.style.display='none'
 }
 
 async function saveEditEmployee(id) {
-  const nameInput = document.getElementById('emp-name-input-' + id)
-  const posInput  = document.getElementById('emp-pos-input-'  + id)
-  const newName   = nameInput.value.trim()
-  const newPos    = posInput.value.trim()
-
-  if(!newName) return showToast('이름을 입력하세요', 'error')
-
-  const r = await fetch('/api/employees/' + id, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: newName, position: newPos || '사회복지사' })
+  const newName=document.getElementById('emp-name-input-'+id).value.trim()
+  const newPos=document.getElementById('emp-pos-input-'+id).value.trim()
+  if(!newName) return showToast('이름을 입력하세요','error')
+  const r=await fetch('/api/employees/'+id,{
+    method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name:newName,position:newPos||'사회복지사'})
   })
-  const data = await r.json()
-  if(data.ok) {
-    showToast(newName + ' 정보가 수정되었습니다', 'success')
-    await loadEmployees()
-  } else {
-    showToast(data.error || '수정 실패', 'error')
-  }
+  const data=await r.json()
+  if(data.ok) { showToast(newName+' 수정 완료','success'); await loadEmployees() }
+  else showToast(data.error||'오류','error')
 }
 
 async function addEmployee() {
-  const name = document.getElementById('new-employee-name').value.trim()
-  const pos = document.getElementById('new-employee-pos').value.trim()
+  const name=document.getElementById('new-employee-name').value.trim()
+  const pos=document.getElementById('new-employee-pos').value.trim()
   if(!name) return showToast('이름을 입력하세요','error')
-  const r = await fetch('/api/employees',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({name, position: pos||'사회복지사'})
+  const r=await fetch('/api/employees',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,position:pos||'사회복지사'})
   })
-  const data = await r.json()
+  const data=await r.json()
   if(data.ok) {
-    showToast(name+' 직원이 추가되었습니다','success')
+    showToast(name+' 추가 완료','success')
     document.getElementById('new-employee-name').value=''
     document.getElementById('new-employee-pos').value=''
     await loadEmployees()
@@ -1374,35 +1548,35 @@ async function addEmployee() {
 }
 
 async function removeEmployee(id) {
-  const emp = employees.find(e=>e.id===id)
+  const emp=employees.find(e=>e.id===id)
   if(!confirm((emp?.name||id)+'을(를) 삭제하시겠습니까?')) return
-  const r = await fetch('/api/employees/'+id, {method:'DELETE'})
-  const data = await r.json()
-  if(data.ok) {
-    showToast('삭제되었습니다','success')
-    await loadEmployees()
-  }
+  const r=await fetch('/api/employees/'+id,{method:'DELETE'})
+  const data=await r.json()
+  if(data.ok) { showToast('삭제되었습니다','success'); await loadEmployees() }
 }
 
-// ═══════════════════════════════════════════════════
-// 유틸
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// 토스트
+// ══════════════════════════════════════════════
 function showToast(msg, type='info') {
-  const toast = document.getElementById('toast')
-  const bgColor = type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-blue-600'
-  const icon = type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'
-  toast.innerHTML = \`<div class="\${bgColor} text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2">
-    <i class="fas \${icon}"></i>\${msg}
-  </div>\`
-  toast.classList.remove('hidden')
-  setTimeout(()=>toast.classList.add('hidden'), 3000)
+  const toast=document.getElementById('toast')
+  const bg=type==='success'?'#16a34a':type==='error'?'#dc2626':'#1d4ed8'
+  const icon=type==='success'?'fa-check-circle':type==='error'?'fa-exclamation-circle':'fa-info-circle'
+  const div=document.createElement('div')
+  div.className='toast-item'
+  div.style.background=bg
+  div.innerHTML='<i class="fas '+icon+'"></i>'+msg
+  toast.appendChild(div)
+  setTimeout(()=>div.remove(), 3200)
 }
 
-// 월 선택 기본값 현재월로
-const now = new Date()
-document.getElementById('monthly-month').value = now.getMonth()+1
-document.getElementById('stats-month').value = ''
-document.getElementById('print-month').value = now.getMonth()+1
+// ══════════════════════════════════════════════
+// 기본값 설정
+// ══════════════════════════════════════════════
+const _now = new Date()
+const _m = _now.getMonth()+1
+if(document.getElementById('monthly-month')) document.getElementById('monthly-month').value=_m
+if(document.getElementById('print-month')) document.getElementById('print-month').value=_m
 </script>
 </body>
 </html>`
