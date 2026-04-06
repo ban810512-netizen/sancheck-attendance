@@ -1246,14 +1246,14 @@ function renderEmployeeList() {
             <td>
               <span id="emp-name-text-\${e.id}" class="font-medium">\${e.name}</span>
               <input id="emp-name-input-\${e.id}" type="text" value="\${e.name}"
-                class="hidden text-sm border rounded px-2 py-1 w-full"
+                class="text-sm border rounded px-2 py-1 w-full"
                 style="display:none">
             </td>
             <td>
               <span id="emp-pos-text-\${e.id}">\${e.position||''}</span>
               <input id="emp-pos-input-\${e.id}" type="text" value="\${e.position||''}"
                 placeholder="직책 입력"
-                class="hidden text-sm border rounded px-2 py-1 w-full"
+                class="text-sm border rounded px-2 py-1 w-full"
                 style="display:none">
             </td>
             <td class="no-print">
