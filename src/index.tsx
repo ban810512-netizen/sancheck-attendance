@@ -28,6 +28,16 @@ app.post('/api/employees', async (c) => {
   return c.json({ ok: true, id: r.meta.last_row_id })
 })
 
+app.put('/api/employees/:id', async (c) => {
+  const id = c.req.param('id')
+  const { name, position } = await c.req.json()
+  if (!name) return c.json({ ok: false, error: '이름을 입력하세요' }, 400)
+  await c.env.DB.prepare(
+    'UPDATE employees SET name=?, position=? WHERE id=?'
+  ).bind(name, position || '사회복지사', id).run()
+  return c.json({ ok: true })
+})
+
 app.delete('/api/employees/:id', async (c) => {
   const id = c.req.param('id')
   await c.env.DB.prepare('UPDATE employees SET is_active=0 WHERE id=?').bind(id).run()
@@ -1215,24 +1225,134 @@ function renderEmployeeList() {
   const container = document.getElementById('employee-list')
   if(!container) return
   if(employees.length===0) {
-    container.innerHTML='<p class="text-gray-400 text-sm">등록된 직원이 없습니다</p>'
+    container.innerHTML='<p class="text-gray-400 text-sm py-4 text-center">등록된 직원이 없습니다</p>'
     return
   }
   container.innerHTML = \`
+    <div class="overflow-x-auto">
     <table class="print-table">
-      <thead><tr><th>번호</th><th>성명</th><th>직책</th><th>관리</th></tr></thead>
+      <thead>
+        <tr>
+          <th class="w-10">번호</th>
+          <th>성명</th>
+          <th>직책</th>
+          <th class="w-40 no-print">관리</th>
+        </tr>
+      </thead>
       <tbody>
         \${employees.map(e=>\`
-          <tr>
-            <td>\${e.id}</td>
-            <td class="font-medium">\${e.name}</td>
-            <td>\${e.position||''}</td>
-            <td><button onclick="removeEmployee(\${e.id})" class="bg-red-100 text-red-700 px-3 py-1 rounded text-xs hover:bg-red-200">삭제</button></td>
+          <tr id="emp-row-\${e.id}">
+            <td class="text-center text-gray-500">\${e.id}</td>
+            <td>
+              <span id="emp-name-text-\${e.id}" class="font-medium">\${e.name}</span>
+              <input id="emp-name-input-\${e.id}" type="text" value="\${e.name}"
+                class="hidden text-sm border rounded px-2 py-1 w-full"
+                style="display:none">
+            </td>
+            <td>
+              <span id="emp-pos-text-\${e.id}">\${e.position||''}</span>
+              <input id="emp-pos-input-\${e.id}" type="text" value="\${e.position||''}"
+                placeholder="직책 입력"
+                class="hidden text-sm border rounded px-2 py-1 w-full"
+                style="display:none">
+            </td>
+            <td class="no-print">
+              <div id="emp-btn-view-\${e.id}" class="flex gap-1 justify-center">
+                <button onclick="startEditEmployee(\${e.id})"
+                  class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs hover:bg-blue-200 font-medium">
+                  <i class="fas fa-edit mr-1"></i>수정
+                </button>
+                <button onclick="removeEmployee(\${e.id})"
+                  class="bg-red-100 text-red-700 px-3 py-1 rounded text-xs hover:bg-red-200 font-medium">
+                  <i class="fas fa-trash mr-1"></i>삭제
+                </button>
+              </div>
+              <div id="emp-btn-edit-\${e.id}" class="flex gap-1 justify-center" style="display:none">
+                <button onclick="saveEditEmployee(\${e.id})"
+                  class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 font-medium">
+                  <i class="fas fa-check mr-1"></i>저장
+                </button>
+                <button onclick="cancelEditEmployee(\${e.id})"
+                  class="bg-gray-200 text-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-300 font-medium">
+                  취소
+                </button>
+              </div>
+            </td>
           </tr>
         \`).join('')}
       </tbody>
     </table>
+    </div>
   \`
+}
+
+function startEditEmployee(id) {
+  // 다른 행 편집 중이면 취소
+  employees.forEach(e => { if(e.id !== id) cancelEditEmployee(e.id) })
+
+  const nameText  = document.getElementById('emp-name-text-' + id)
+  const nameInput = document.getElementById('emp-name-input-' + id)
+  const posText   = document.getElementById('emp-pos-text-'  + id)
+  const posInput  = document.getElementById('emp-pos-input-' + id)
+  const btnView   = document.getElementById('emp-btn-view-'  + id)
+  const btnEdit   = document.getElementById('emp-btn-edit-'  + id)
+
+  nameText.style.display  = 'none'
+  posText.style.display   = 'none'
+  nameInput.style.display = ''
+  posInput.style.display  = ''
+  btnView.style.display   = 'none'
+  btnEdit.style.display   = ''
+
+  nameInput.focus()
+  // Enter 키로 저장
+  nameInput.onkeydown = (e) => { if(e.key==='Enter') saveEditEmployee(id) }
+  posInput.onkeydown  = (e) => { if(e.key==='Enter') saveEditEmployee(id) }
+}
+
+function cancelEditEmployee(id) {
+  const emp = employees.find(e=>e.id===id)
+  if(!emp) return
+  const nameText  = document.getElementById('emp-name-text-' + id)
+  const nameInput = document.getElementById('emp-name-input-' + id)
+  const posText   = document.getElementById('emp-pos-text-'  + id)
+  const posInput  = document.getElementById('emp-pos-input-' + id)
+  const btnView   = document.getElementById('emp-btn-view-'  + id)
+  const btnEdit   = document.getElementById('emp-btn-edit-'  + id)
+  if(!nameText) return
+
+  // 원래 값 복원
+  nameInput.value = emp.name
+  posInput.value  = emp.position || ''
+
+  nameText.style.display  = ''
+  posText.style.display   = ''
+  nameInput.style.display = 'none'
+  posInput.style.display  = 'none'
+  btnView.style.display   = ''
+  btnEdit.style.display   = 'none'
+}
+
+async function saveEditEmployee(id) {
+  const nameInput = document.getElementById('emp-name-input-' + id)
+  const posInput  = document.getElementById('emp-pos-input-'  + id)
+  const newName   = nameInput.value.trim()
+  const newPos    = posInput.value.trim()
+
+  if(!newName) return showToast('이름을 입력하세요', 'error')
+
+  const r = await fetch('/api/employees/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: newName, position: newPos || '사회복지사' })
+  })
+  const data = await r.json()
+  if(data.ok) {
+    showToast(newName + ' 정보가 수정되었습니다', 'success')
+    await loadEmployees()
+  } else {
+    showToast(data.error || '수정 실패', 'error')
+  }
 }
 
 async function addEmployee() {
