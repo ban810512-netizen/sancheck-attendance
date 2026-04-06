@@ -428,34 +428,6 @@ label.form-label{display:block;font-size:13px;font-weight:600;color:#374151;marg
 ══════════════════════════════════════════════ -->
 <div id="page-dashboard">
 
-  <!-- KPI 카드 행 -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" class="kpi-grid">
-    <div class="stat-card" style="background:linear-gradient(135deg,#1e40af,#2563eb);">
-      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">오늘 출근</div>
-      <div id="kpi-checkin" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
-      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">명 출근 완료</div>
-      <i class="fas fa-user-check" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
-    </div>
-    <div class="stat-card" style="background:linear-gradient(135deg,#065f46,#059669);">
-      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">이번달 연차</div>
-      <div id="kpi-annual" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
-      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">일 사용</div>
-      <i class="fas fa-umbrella-beach" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
-    </div>
-    <div class="stat-card" style="background:linear-gradient(135deg,#7c2d12,#ea580c);">
-      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">이번달 반차</div>
-      <div id="kpi-half" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
-      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">회 사용</div>
-      <i class="fas fa-clock" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
-    </div>
-    <div class="stat-card" style="background:linear-gradient(135deg,#581c87,#9333ea);">
-      <div style="color:rgba(255,255,255,.7);font-size:12px;font-weight:600;margin-bottom:8px;">이번달 병가</div>
-      <div id="kpi-sick" style="color:#fff;font-size:32px;font-weight:800;line-height:1;">-</div>
-      <div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">일</div>
-      <i class="fas fa-notes-medical" style="position:absolute;right:20px;top:20px;font-size:28px;color:rgba(255,255,255,.2);"></i>
-    </div>
-  </div>
-
   <!-- 직원 카드 그리드 + 등록 패널 -->
   <div class="card" style="padding:24px;margin-bottom:24px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
@@ -514,11 +486,6 @@ label.form-label{display:block;font-size:13px;font-weight:600;color:#374151;marg
     </div>
   </div>
 
-  <!-- 이번달 직원별 현황 테이블 -->
-  <div class="card" style="padding:24px;">
-    <div style="font-size:15px;font-weight:800;color:#1e3a8a;margin-bottom:16px;"><i class="fas fa-table" style="color:#2563eb;margin-right:8px;"></i>이번달 근무 현황 요약</div>
-    <div id="month-summary-table" style="overflow-x:auto;"></div>
-  </div>
 </div>
 
 
@@ -563,23 +530,14 @@ label.form-label{display:block;font-size:13px;font-weight:600;color:#374151;marg
           <div style="background:#dbeafe;text-align:center;padding:5px 0;font-size:11px;font-weight:700;color:#1e3a8a;border-right:1px solid #1e3a8a;">담&nbsp;&nbsp;&nbsp;당</div>
           <div style="background:#dbeafe;text-align:center;padding:5px 0;font-size:11px;font-weight:700;color:#1e3a8a;border-right:1px solid #1e3a8a;">전문사회복지사</div>
           <div style="background:#dbeafe;text-align:center;padding:5px 0;font-size:11px;font-weight:700;color:#1e3a8a;">센&nbsp;터&nbsp;장</div>
-          <div style="border-top:1px solid #1e3a8a;border-right:1px solid #1e3a8a;height:56px;padding:4px;font-size:11px;color:#374151;">
+          <div style="border-top:1px solid #1e3a8a;border-right:1px solid #1e3a8a;height:64px;padding:4px;font-size:11px;color:#374151;">
             <div id="sign-applicant-view" contenteditable="true" style="height:100%;outline:none;font-size:11px;"></div>
           </div>
-          <div style="border-top:1px solid #1e3a8a;border-right:1px solid #1e3a8a;height:56px;padding:4px;font-size:11px;color:#374151;">
+          <div style="border-top:1px solid #1e3a8a;border-right:1px solid #1e3a8a;height:64px;padding:4px;font-size:11px;color:#374151;">
             <div id="sign-social-view" contenteditable="true" style="height:100%;outline:none;font-size:11px;"></div>
           </div>
-          <div style="border-top:1px solid #1e3a8a;height:56px;padding:4px;font-size:11px;color:#374151;">
+          <div style="border-top:1px solid #1e3a8a;height:64px;padding:4px;font-size:11px;color:#374151;">
             <div id="sign-director-view" contenteditable="true" style="height:100%;outline:none;font-size:11px;"></div>
-          </div>
-          <div style="border-top:1px solid #93c5fd;border-right:1px solid #1e3a8a;padding:3px;text-align:center;">
-            <input id="date-applicant-view" type="text" placeholder="서명일" style="font-size:9px;padding:1px;text-align:center;border:none;background:transparent;width:100%;outline:none;">
-          </div>
-          <div style="border-top:1px solid #93c5fd;border-right:1px solid #1e3a8a;padding:3px;text-align:center;">
-            <input id="date-social-view" type="text" placeholder="서명일" style="font-size:9px;padding:1px;text-align:center;border:none;background:transparent;width:100%;outline:none;">
-          </div>
-          <div style="border-top:1px solid #93c5fd;padding:3px;text-align:center;">
-            <input id="date-director-view" type="text" placeholder="서명일" style="font-size:9px;padding:1px;text-align:center;border:none;background:transparent;width:100%;outline:none;">
           </div>
         </div>
       </div>
@@ -769,8 +727,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setDefaultDate()
   setLrSubmitDate()
   await loadEmployees()
-  loadKPI()
-  loadMonthSummaryTable()
+  loadCardStatuses()
 })
 
 function startClock() {
@@ -1060,8 +1017,6 @@ async function submitAttendance() {
     showToast('등록 완료!','success')
     closeRegPanel()
     loadCardStatuses()
-    loadKPI()
-    loadMonthSummaryTable()
   } else showToast(data.error||'오류','error')
 }
 
@@ -1101,6 +1056,12 @@ async function loadMonthly() {
     <th>비고</th>
   </tr></thead><tbody>\`
 
+  // 직원별 집계 카운터
+  const empWorkCount = {}
+  const empAnnualCount = {}
+  const empHalfCount = {}
+  empIds.forEach(eid => { empWorkCount[eid]=0; empAnnualCount[eid]=0; empHalfCount[eid]=0 })
+
   allDates.forEach(dateStr => {
     const dow = new Date(dateStr).getDay()
     const isWknd = dow===0||dow===6
@@ -1112,13 +1073,70 @@ async function loadMonthly() {
       if(isWknd||isHol) { html += \`<td style="color:#9ca3af;font-size:11px;">휴무</td>\`; return }
       const rec = map[dateStr]?.[eid]
       if(rec) {
+        if(rec.status==='출근') empWorkCount[eid]++
+        else if(rec.status==='연차') empAnnualCount[eid]++
+        else if(rec.status==='오전반차'||rec.status==='오후반차') empHalfCount[eid]++
         const display = rec.status==='출근' ? (rec.check_in||'출근') : rec.status
         html += \`<td><span class="badge badge-\${rec.status}" style="font-size:10px;">\${display}</span></td>\`
       } else html += \`<td style="color:#d1d5db;">-</td>\`
     })
     html += \`<td style="font-size:11px;color:#6b7280;">\${isHol?'공휴일':''}</td></tr>\`
   })
+
+  // ── 합계 행 ──
+  html += \`<tr style="background:#1e3a8a;">
+    <td colspan="2" style="color:#fff;font-weight:800;font-size:12px;text-align:center;">합&nbsp;&nbsp;계</td>\`
+  empIds.forEach(eid => {
+    html += \`<td style="background:#1e3a8a;padding:6px 2px;">
+      <div style="color:#86efac;font-size:11px;font-weight:700;">출근 \${empWorkCount[eid]}일</div>
+      <div style="color:#fde68a;font-size:11px;">연차 \${empAnnualCount[eid]}일</div>
+      <div style="color:#c4b5fd;font-size:11px;">반차 \${empHalfCount[eid]}회</div>
+    </td>\`
+  })
+  html += \`<td style="background:#1e3a8a;"></td></tr>\`
+
   html += '</tbody></table>'
+
+  // ── 개인별 총 근무일수 / 연가일수 요약 카드 ──
+  html += \`<div style="margin-top:20px;border:2px solid #1e3a8a;border-radius:10px;overflow:hidden;">
+    <div style="background:#1e3a8a;color:#fff;padding:8px 16px;font-size:13px;font-weight:800;letter-spacing:1px;">
+      <i class="fas fa-table" style="margin-right:6px;"></i>개인별 총 근무일수 및 연가 일수 집계
+    </div>
+    <table style="border-collapse:collapse;width:100%;">
+      <thead>
+        <tr style="background:#eff6ff;">
+          <th style="border:1px solid #bfdbfe;padding:8px 12px;font-size:12px;color:#1e40af;text-align:center;">성명</th>
+          <th style="border:1px solid #bfdbfe;padding:8px 12px;font-size:12px;color:#1e40af;text-align:center;">총 근무일수</th>
+          <th style="border:1px solid #bfdbfe;padding:8px 12px;font-size:12px;color:#1e40af;text-align:center;">연차 사용(일)</th>
+          <th style="border:1px solid #bfdbfe;padding:8px 12px;font-size:12px;color:#1e40af;text-align:center;">반차 사용(회)</th>
+          <th style="border:1px solid #bfdbfe;padding:8px 12px;font-size:12px;color:#1e40af;text-align:center;">반차 환산(일)</th>
+          <th style="border:1px solid #bfdbfe;padding:8px 12px;font-size:12px;color:#1e40af;text-align:center;">합산 연가(일)</th>
+        </tr>
+      </thead>
+      <tbody>
+        \${empIds.map(eid => {
+          const nm = empNames[eid] || eid
+          const wc = empWorkCount[eid] || 0
+          const ac = empAnnualCount[eid] || 0
+          const hc = empHalfCount[eid] || 0
+          const hd = (hc * 0.5).toFixed(1)
+          const total = (ac + hc * 0.5).toFixed(1)
+          return \`<tr style="text-align:center;">
+            <td style="border:1px solid #e2e8f0;padding:8px 12px;font-weight:700;color:#1e3a8a;">\${nm}</td>
+            <td style="border:1px solid #e2e8f0;padding:8px 12px;"><span style="font-size:18px;font-weight:800;color:#15803d;">\${wc}</span><span style="font-size:11px;color:#6b7280;"> 일</span></td>
+            <td style="border:1px solid #e2e8f0;padding:8px 12px;"><span style="font-size:18px;font-weight:800;color:#b45309;">\${ac}</span><span style="font-size:11px;color:#6b7280;"> 일</span></td>
+            <td style="border:1px solid #e2e8f0;padding:8px 12px;"><span style="font-size:18px;font-weight:800;color:#6d28d9;">\${hc}</span><span style="font-size:11px;color:#6b7280;"> 회</span></td>
+            <td style="border:1px solid #e2e8f0;padding:8px 12px;"><span style="font-size:16px;font-weight:700;color:#7c3aed;">\${hd}</span><span style="font-size:11px;color:#6b7280;"> 일</span></td>
+            <td style="border:1px solid #e2e8f0;padding:8px 12px;background:#fffbeb;"><span style="font-size:18px;font-weight:800;color:#dc2626;">\${total}</span><span style="font-size:11px;color:#6b7280;"> 일</span></td>
+          </tr>\`
+        }).join('')}
+      </tbody>
+    </table>
+    <div style="background:#f8fafc;padding:8px 16px;font-size:11px;color:#6b7280;border-top:1px solid #e2e8f0;">
+      ※ 합산 연가 = 연차 사용일 + 반차 사용횟수 × 0.5일
+    </div>
+  </div>\`
+
   container.innerHTML = html
 }
 
