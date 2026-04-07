@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sancheck-attendance
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: RENDER
+        value: true
+      - key: NODE_ENV
+        value: production
+    disk:
+      name: sancheck-db
+      mountPath: /var/data
+      sizeGB: 1

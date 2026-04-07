@@ -10,10 +10,11 @@ const PORT = process.env.PORT || 3000
 
 app.use(express.json())
 
-// DB 초기화
-const dataDir = join(__dirname, 'data')
+// DB 초기화 - Render 영구 디스크 또는 로컬 data 폴더
+const dataDir = process.env.RENDER ? '/var/data' : join(__dirname, 'data')
 if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true })
 const db = new Database(join(dataDir, 'sancheck.db'))
+console.log('DB 경로:', join(dataDir, 'sancheck.db'))
 
 db.exec(`
 CREATE TABLE IF NOT EXISTS employees (
