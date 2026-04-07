@@ -265,22 +265,7 @@ label{font-size:12px;font-weight:600;color:#64748b;display:block;margin-bottom:5
 .tst{background:#0f172a;color:#fff;padding:11px 22px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:8px;animation:fadeIn .2s ease;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── PIN 잠금 화면 ── */
-#pin-screen{position:fixed;inset:0;background:#1e293b;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9000;}
-#pin-screen.hide{display:none;}
-.pin-logo{text-align:center;margin-bottom:36px;}
-.pin-logo .pl-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;}
-.pin-logo .pl-sub{font-size:13px;color:rgba(255,255,255,.45);}
-.pin-dots{display:flex;gap:16px;margin-bottom:40px;}
-.pin-dot{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .15s;}
-.pin-dot.filled{background:#2563eb;}
-.pin-dot.error{background:#ef4444;}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:260px;}
-.pin-btn{height:72px;border-radius:16px;border:none;background:rgba(255,255,255,.08);color:#fff;font-size:24px;font-weight:700;cursor:pointer;transition:background .1s,transform .1s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;}
-.pin-btn:active{background:rgba(255,255,255,.18);transform:scale(.94);}
-.pin-btn .pk-sub{font-size:9px;color:rgba(255,255,255,.35);font-weight:500;letter-spacing:1px;}
-.pin-del{background:transparent!important;font-size:20px;}
-.pin-err{font-size:13px;color:#ef4444;margin-top:-24px;margin-bottom:16px;min-height:20px;text-align:center;}
+
 
 /* ── 인쇄 ── */
 @media print{
@@ -302,35 +287,7 @@ body.print-leave .main-area>*:not(#pg-leave){display:none!important;}
 </head>
 <body>
 
-<!-- ══ PIN 잠금 화면 ══ -->
-<div id="pin-screen">
-  <div class="pin-logo">
-    <div style="font-size:40px;margin-bottom:12px;">🔒</div>
-    <div class="pl-title">산청인애노인통합지원센터</div>
-    <div class="pl-sub">근무상황부 · PIN 4자리를 입력하세요</div>
-  </div>
-  <div class="pin-dots">
-    <div class="pin-dot" id="pd-0"></div>
-    <div class="pin-dot" id="pd-1"></div>
-    <div class="pin-dot" id="pd-2"></div>
-    <div class="pin-dot" id="pd-3"></div>
-  </div>
-  <div class="pin-err" id="pin-err"></div>
-  <div class="pin-pad">
-    <button class="pin-btn" onclick="pinInput('1')">1<span class="pk-sub"></span></button>
-    <button class="pin-btn" onclick="pinInput('2')">2<span class="pk-sub">ABC</span></button>
-    <button class="pin-btn" onclick="pinInput('3')">3<span class="pk-sub">DEF</span></button>
-    <button class="pin-btn" onclick="pinInput('4')">4<span class="pk-sub">GHI</span></button>
-    <button class="pin-btn" onclick="pinInput('5')">5<span class="pk-sub">JKL</span></button>
-    <button class="pin-btn" onclick="pinInput('6')">6<span class="pk-sub">MNO</span></button>
-    <button class="pin-btn" onclick="pinInput('7')">7<span class="pk-sub">PQRS</span></button>
-    <button class="pin-btn" onclick="pinInput('8')">8<span class="pk-sub">TUV</span></button>
-    <button class="pin-btn" onclick="pinInput('9')">9<span class="pk-sub">WXYZ</span></button>
-    <div></div>
-    <button class="pin-btn" onclick="pinInput('0')">0</button>
-    <button class="pin-btn pin-del" onclick="pinDel()"><i class="fas fa-delete-left"></i></button>
-  </div>
-</div>
+
 
 <div class="app-shell">
 
@@ -531,14 +488,9 @@ const DAYS=['일','월','화','수','목','금','토']
 const AVCOL=[['#dbeafe','#1d4ed8'],['#dcfce7','#16a34a'],['#fce7f3','#9d174d'],['#fef9c3','#92400e'],['#e0f2fe','#0369a1']]
 let emps=[]
 
-// ── PIN 비활성화 (바로 접속) ──
+// PIN 제거 - 바로 접속
 function checkSession(){ return true }
 function saveSession(){}
-function pinInput(){}
-function pinDel(){}
-function updatePinDots(){}
-// PIN 화면 바로 숨김
-document.getElementById('pin-screen').classList.add('hide')
 
 // 시계 + 날짜 표시 (PC 사이드바 & 모바일 상단 동시)
 const PAGE_TITLES={dash:'대시보드',monthly:'근무현황',leave:'연차신청',print:'개인출력',stats:'연차현황',emp:'직원관리'}
