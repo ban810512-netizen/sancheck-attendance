@@ -754,9 +754,9 @@ async function getHireYears(){
   }catch(e){}
   return _hireYearsCache
 }
-async function saveHireYear(empId, year){
-  await fetch('/api/hire-years',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({employee_id:empId,hire_year:year})})
-  _hireYearsCache[empId] = year
+async function saveHireYear(empId, year, date){
+  await fetch('/api/hire-years',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({employee_id:empId,hire_year:year,hire_date:date})})
+  _hireYearsCache[empId] = {year, date}
 }
 
 async function renderHireYearList(){
@@ -764,21 +764,40 @@ async function renderHireYearList(){
   const hy=await getHireYears()
   const curYear=new Date().getFullYear()
   c.innerHTML=emps.map(e=>{
-    const defY=hy[e.id]||curYear
-    return \`<div style="display:flex;align-items:center;gap:10px;">
-      <span style="font-size:13px;font-weight:600;color:#111;min-width:60px;">\${e.name}</span>
-      <select id="hy-\${e.id}" onchange="onHireYearChange(\${e.id},this.value)" style="flex:1;padding:7px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;">
-        \${Array.from({length:35},(_,i)=>curYear-i).map(y=>
-          \`<option value="\${y}" \${defY==y?'selected':''}>\${y}년 입사</option>\`
-        ).join('')}
-      </select>
+    const info=hy[e.id]||{}
+    const defY=info.year||curYear
+    const defD=info.date||''
+    return \`<div style="background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:12px;margin-bottom:8px;">
+      <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:10px;">\${e.name}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px;">입사연도</div>
+          <select id="hy-\${e.id}" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;">
+            \${Array.from({length:35},(_,i)=>curYear-i).map(y=>
+              \`<option value="\${y}" \${defY==y?'selected':''}>\${y}년</option>\`
+            ).join('')}
+          </select>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px;">입사일자</div>
+          <input type="date" id="hd-\${e.id}" value="\${defD}" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;">
+        </div>
+      </div>
+      <button onclick="saveHireYearBtn(\${e.id})" style="width:100%;padding:9px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-save"></i> 저장</button>
     </div>\`
   }).join('')
 }
 
+async function saveHireYearBtn(empId){
+  const year=parseInt(document.getElementById('hy-'+empId).value)
+  const date=document.getElementById('hd-'+empId).value||''
+  await saveHireYear(empId, year, date)
+  toast('입사정보 저장 완료!','s')
+  loadAnnual()
+}
 async function onHireYearChange(empId, year){
-  await saveHireYear(parseInt(empId), parseInt(year))
-  toast('입사연도 저장 완료!','s')
+  const date=document.getElementById('hd-'+empId)?.value||''
+  await saveHireYear(parseInt(empId), parseInt(year), date)
   loadAnnual()
 }
 
@@ -794,10 +813,12 @@ async function loadAnnual(){
   const c=document.getElementById('al-out'); if(!c||!d.data) return
   const hy=await getHireYears()
   let html=\`<div style="overflow-x:auto;"><table class="st-tbl"><thead><tr>
-    <th style="text-align:left;">성명</th><th>입사</th><th>발생일수</th><th>사용</th><th>잔여</th><th>사용률</th>
+    <th style="text-align:left;">성명</th><th>입사일자</th><th>발생일수</th><th>사용</th><th>잔여</th><th>사용률</th>
   </tr></thead><tbody>\`
   d.data.forEach(row=>{
-    const hireY=hy[row.employee_id]||(new Date().getFullYear())
+    const info=hy[row.employee_id]||{}
+    const hireY=info.year||(new Date().getFullYear())
+    const hireDate=info.date||''
     const yw=parseInt(year)-hireY
     const allow=calcAllow(yw)
     const hd=((row.am_half||0)+(row.pm_half||0))*0.5
@@ -807,7 +828,7 @@ async function loadAnnual(){
     const rc=rate>80?'#dc2626':rate>50?'#f59e0b':'#16a34a'
     html+=\`<tr>
       <td class="nm">\${row.name}</td>
-      <td style="font-size:12px;color:#6b7280;">\${hireY}년</td>
+      <td style="font-size:12px;color:#6b7280;">\${hireDate?hireDate:hireY+'년'}</td>
       <td><b style="color:#2563eb;">\${allow}일</b></td>
       <td>\${used}일</td>
       <td><b style="color:\${rem===0?'#dc2626':'#16a34a'};">\${rem}일</b></td>

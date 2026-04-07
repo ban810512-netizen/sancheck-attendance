@@ -179,21 +179,24 @@ app.delete('/api/leave-requests/:id', (req, res) => {
 db.exec(`CREATE TABLE IF NOT EXISTS hire_years (
   employee_id INTEGER PRIMARY KEY,
   hire_year INTEGER NOT NULL,
+  hire_date TEXT,
   updated_at TEXT DEFAULT (datetime('now','+9 hours'))
 )`)
+// 기존 테이블에 hire_date 컬럼 추가 (없을 경우)
+try { db.exec(`ALTER TABLE hire_years ADD COLUMN hire_date TEXT`) } catch(e) {}
 
 app.get('/api/hire-years', (req, res) => {
-  const rows = db.prepare('SELECT employee_id, hire_year FROM hire_years').all()
+  const rows = db.prepare('SELECT employee_id, hire_year, hire_date FROM hire_years').all()
   const result = {}
-  rows.forEach(r => { result[r.employee_id] = r.hire_year })
+  rows.forEach(r => { result[r.employee_id] = { year: r.hire_year, date: r.hire_date || '' } })
   res.json({ ok: true, data: result })
 })
 app.post('/api/hire-years', (req, res) => {
-  const { employee_id, hire_year } = req.body
+  const { employee_id, hire_year, hire_date } = req.body
   if (!employee_id || !hire_year) return res.status(400).json({ ok: false, error: '필수 항목 누락' })
-  db.prepare(`INSERT INTO hire_years (employee_id, hire_year) VALUES (?,?)
-    ON CONFLICT(employee_id) DO UPDATE SET hire_year=excluded.hire_year, updated_at=datetime('now','+9 hours')`
-  ).run(employee_id, hire_year)
+  db.prepare(`INSERT INTO hire_years (employee_id, hire_year, hire_date) VALUES (?,?,?)
+    ON CONFLICT(employee_id) DO UPDATE SET hire_year=excluded.hire_year, hire_date=excluded.hire_date, updated_at=datetime('now','+9 hours')`
+  ).run(employee_id, hire_year, hire_date || null)
   res.json({ ok: true })
 })
 
